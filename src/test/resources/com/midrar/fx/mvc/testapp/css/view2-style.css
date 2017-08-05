@@ -1,0 +1,13 @@
+.label {
+    -fx-background-color: #7bee83;
+    -fx-text-fill: blue;
+}
+
+
+.button :hover {
+    -fx-background-color: #8eff96;
+}
+
+.button :armed {
+    -fx-background-color: #1bd648;
+}

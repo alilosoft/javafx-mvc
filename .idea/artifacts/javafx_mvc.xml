@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="javafx-mvc">
+    <output-path>$PROJECT_DIR$/out/artifacts/javafx_mvc</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="com.midrar.fx.mvc.testapp.TestApp" />
+        <option name="description" value="" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="nativeBundle" value="exe" />
+        <option name="title" value="fxmvc" />
+        <option name="vendor" value="midrar.com" />
+        <option name="version" value="" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="javafx_mvc.jar">
+        <element id="module-output" name="javafx-mvc" />
+      </element>
+    </root>
+  </artifact>
+</component>
