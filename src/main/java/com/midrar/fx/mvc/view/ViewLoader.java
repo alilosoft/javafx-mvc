@@ -38,9 +38,7 @@ public class ViewLoader {
     private java.util.ResourceBundle globalResourceBundle;
 
     public ViewLoader() {
-        controllerManager = new ControllerManager();
-        // define the factory to use when the controller is defined in .fxml file by fx:controller.
-        fxmlLoader.setControllerFactory(controllerManager::createController);
+        this(new ControllerManager());
     }
 
 
@@ -51,6 +49,8 @@ public class ViewLoader {
     public ViewLoader(ControllerManager controllerManager, ResourceBundle globalResourceBundle) {
         this.controllerManager = controllerManager;
         this.globalResourceBundle = globalResourceBundle;
+        // define the factory to use when the controller is defined in .fxml file by fx:controller.
+        this.fxmlLoader.setControllerFactory(this.controllerManager::createController);
     }
 
     /**
