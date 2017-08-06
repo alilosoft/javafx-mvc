@@ -40,45 +40,28 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import lombok.*;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 
 /**
- * # View class: is an abstraction of javafx {@link Parent}
- * > A View object is a representation of a {@link Node} hierarchy defined by a .fxml file.
- * It encapsulate the following elements:
- *
- * >- The {@link java.net.URL} of the .fxml file.
- * - The {@link Node} hierarchy loaded from the .fxml file.
- * - A {@link String} title to be used if shown in a {@link javafx.stage.Stage} or a {@link javafx.scene.control.Tab}.
- * - A list of icons as {@link java.util.List}<{@link javafx.scene.image.Image}> to use if shown in a {@link javafx.stage.Stage} or a {@link javafx.scene.control.Tab}.
- * - A {@link java.net.URL} to a .css file to add to the scene used to show the View.
- * - A reference to the controller object associated to this View.
  */
 @Data
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
-public class View<Controller> {
+public class View<C> {
     @NonNull
-    private Class controllerClass;
-    private Controller controller;
+    private C controller;
+    @NonNull
     private Parent rootNode;
-
-    private URL fxmlFileUrl;
-    private ResourceBundle resourceBundle;
     private String title;
     private List<Image> icons;
     private List<String> cssUrls;
 
     private StageConfigurer stageConfigurer;
-
     private BooleanProperty isShown = new SimpleBooleanProperty(); ;
-    private StringProperty titleProperty = new SimpleStringProperty();
 
     public void showInStage(Stage stage) {
         if(isShown.get()){
@@ -92,7 +75,7 @@ public class View<Controller> {
             scene = new Scene(rootNode);
         }
 
-        if(resourceBundle.getLocale().getLanguage().equals(new Locale("ar").getLanguage())){
+        if(Locale.getDefault().equals(new Locale("ar"))){
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         }
 
@@ -161,10 +144,10 @@ public class View<Controller> {
 
     public void close() {
         /**
-         * if this controllerClass is shown in a stage then close the stage;
-         * if it is shown in a TabPane then remove the tab of this controllerClass
+         * if this value is shown in a stage then close the stage;
+         * if it is shown in a TabPane then remove the tab of this value
          * if it is shown in a Pane then-> multiple scenarios ->
-         *  1- if the pane is a rootNode of a controllerClass (i.e: shown in tab or stage) then simply close the controllerClass that controllerClass;
+         *  1- if the pane is a rootNode of a value (i.e: shown in tab or stage) then simply close the value that value;
          *  2- if the pane is part of a layout then try to remove with an appropriate animation effect.
          */
     }
