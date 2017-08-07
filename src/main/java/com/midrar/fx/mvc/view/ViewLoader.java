@@ -104,7 +104,7 @@ public class ViewLoader {
         // assert that the class is annotated with @FXController
         FXController fxController = assertAnnotationExist(controllerClass, FXController.class);
         // reset the fxmlLoader instance to avoid conflicts between different uses.
-        initFXMLLoader();
+        initFXMLLoader();// todo: remove & init in loadFxml()
         // parse the .fxml file url and resource bundle if exist
         URL fxmlUrl = getFxmlFileUrl(controllerClass);
         ResourceBundle bundle = getResourceBundle(controllerClass);
@@ -112,7 +112,7 @@ public class ViewLoader {
         if (!fxController.isDefinedInFxml()) {
             // get a controller instance from the controllerManager and pass it to the fxmlLoader.
             Object controller = getController(controllerClass);
-            fxmlLoader.setController(controller);
+            fxmlLoader.setController(controller);// todo: remove this line and pass the controller as parameter to loadFxml()
         }
         // load the root Node hierarchy from the fxml file.
         return loadFxml(fxmlUrl, bundle);
@@ -128,18 +128,21 @@ public class ViewLoader {
      */
     public View loadView(Class controllerClass) {
         assertAnnotationExist(controllerClass, FXController.class);
-        View view = new View(controllerClass);
-        view.setController(this.getController(controllerClass));
-        view.setFxmlFileUrl(this.getFxmlFileUrl(controllerClass));
-        view.setResourceBundle(this.getResourceBundle(controllerClass));
-        view.setCssUrls(this.getCssUrls(controllerClass));
-        view.setRootNode(this.loadRoot(controllerClass));
-        view.setTitle(this.getTitle(controllerClass));
-        view.setIcons(this.getIcons(controllerClass));
-        view.setStageConfigurer(this.getStageConfigurer(controllerClass));
-
+        View view = createView(controllerClass);
         //injectViews(view);
         //postInjections(view);
+        return view;
+    }
+
+    private View createView(Class controllerClass) {
+        //TODO: check if the view already created (in a cache) then return it, otherwise create one
+        Object controller = this.getController(controllerClass);
+        Parent rootNode = this.loadRoot(controllerClass);
+        View view = new View(controller, rootNode);
+        view.setTitle(this.getTitle(controllerClass));
+        view.setIcons(this.getIcons(controllerClass));
+        view.setCssUrls(this.getCssUrls(controllerClass));
+        view.setStageConfigurer(this.getStageConfigurer(controllerClass));
         return view;
     }
 
@@ -151,11 +154,11 @@ public class ViewLoader {
                         if (field.getType() != View.class) {
                             throw new RuntimeException(FXView.class.getName() + " annotation can only used on fields of type " + View.class.getName());
                         }
-                        FXView viewAnnotation = field.getAnnotation(FXView.class);
-                        Class controllerClass = viewAnnotation.controllerClass();
                         View view = toView;
+                        FXView viewAnnotation = field.getAnnotation(FXView.class);
+                        Class controllerClass = viewAnnotation.value();
                         if (controllerClass != FXView.ThisClass.class) {
-                            view = this.loadView(controllerClass);
+                            view = this.createView(controllerClass);
                         }
                         System.out.println("inject view of class: " + controllerClass.getSimpleName() + " to: " + field.getName());//TODO: delete me
                         boolean canAccess = field.isAccessible();
@@ -178,7 +181,7 @@ public class ViewLoader {
                 .forEach(field -> {
                     try {
                         OnAction onActionAnnotation = field.getAnnotation(OnAction.class);
-                        String methodName = onActionAnnotation.actionHandler();
+                        String methodName = onActionAnnotation.value();
                         Class[] parameterTypes = onActionAnnotation.parameterTypes();
                         String[] parameterValues = onActionAnnotation.parameterValues();
                         Method method = controller.getClass().getMethod(methodName, parameterTypes);
@@ -248,7 +251,7 @@ public class ViewLoader {
      * @return fxml file url.
      */
     private URL getFxmlFileUrl(Class<?> controllerClass) {
-        // get the controllerClass annotation
+        // get the value annotation
         FXController fxAnnotation = controllerClass.getAnnotation(FXController.class);
         // get fxml file name value.
         String fxmlFileName = fxAnnotation.fxml();
@@ -279,7 +282,7 @@ public class ViewLoader {
     }
 
     /**
-     * Try to parses the fxml file name from controllerClass class name.
+     * Try to parses the fxml file name from value class name.
      *
      * @param viewClass
      * @return fxml file name.
@@ -294,7 +297,7 @@ public class ViewLoader {
     }
 
     /**
-     * Use the {@link ControllerManager} instance to get a controller object for the given controllerClass class.
+     * Use the {@link ControllerManager} instance to get a controller object for the given value class.
      * Note that the {@link ControllerManager} uses by default reflection to create new instances,
      * If you want to use a custom factory you can pass it throw the controller manager.
      * Another notice is that the {@link ControllerManager} uses a caching mechanism by default, that mean
@@ -302,7 +305,7 @@ public class ViewLoader {
      * If you want override this behaviour you can disable the caching in the controller manager of this class.
      *
      * @param controllerClass
-     * @return a controller object of the given controllerClass class.
+     * @return a controller object of the given value class.
      */
     private Object getController(Class<?> controllerClass) {
         return controllerManager.createController(controllerClass);
@@ -311,6 +314,7 @@ public class ViewLoader {
     /**
      * Get the resource bundle base name if exist, from the @{@link I18n} annotation
      * and return a resource bundle using the default local.
+     *
      * @param controllerClass
      * @return
      */
@@ -330,12 +334,13 @@ public class ViewLoader {
 
     /**
      * Get the title defined by @{@link Decoration} annotation.
+     *
      * @param controllerClass
      * @return
      */
     private String getTitle(Class<?> controllerClass) {
         Decoration decorationAnnotation = controllerClass.getAnnotation(Decoration.class);
-        if(decorationAnnotation == null){
+        if (decorationAnnotation == null) {
             return "";
         }
         return decorationAnnotation.title();
@@ -343,12 +348,13 @@ public class ViewLoader {
 
     /**
      * Get the icons defined by @{@link Decoration} annotation.
+     *
      * @param controllerClass
      * @return
      */
     private List<Image> getIcons(Class<?> controllerClass) {
         Decoration decorationAnnotation = controllerClass.getAnnotation(Decoration.class);
-        if(decorationAnnotation == null){
+        if (decorationAnnotation == null) {
             return null;
         }
         String[] icons = decorationAnnotation.icons();
@@ -366,6 +372,7 @@ public class ViewLoader {
 
     /**
      * Get CSS files URLs defined by @{@link CSS} annotation.
+     *
      * @param controllerClass
      */
     private List<String> getCssUrls(Class<?> controllerClass) {
@@ -390,12 +397,13 @@ public class ViewLoader {
 
     /**
      * Create a {@link StageConfigurer} object using options defined by @{@link Stage} annotation on a controller class.
+     *
      * @param controllerClass
      * @return StageConfigurer object.
      */
     private StageConfigurer getStageConfigurer(Class<?> controllerClass) {
         Stage stageAnnotation = controllerClass.getAnnotation(Stage.class);
-        if(stageAnnotation == null){
+        if (stageAnnotation == null) {
             return null;
         }
         return new StageConfigurer()
@@ -432,7 +440,7 @@ public class ViewLoader {
     /**
      * Set a global resource bundle to be used by default when loading fxml files.
      * Note that this resource bundle will be used only if not specified explicitly by @{@link FXController},
-     * annotation for a given controllerClass class.
+     * annotation for a given value class.
      *
      * @param globalResourceBundle
      */
