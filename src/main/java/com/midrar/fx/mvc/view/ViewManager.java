@@ -19,11 +19,13 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.midrar.fx.mvc.utils.Asserts.assertAnnotationExist;
 
-public class ViewLoader {
+public class ViewManager implements ViewCacheManager{
+
     private static final String CONTROLLER_CLASS_NAME_SUFFIX_CONVENTION = "Controller";
     private static final String DEFAULT_FXML_FILES_EXTENSION = ".fxml";
     private static final String DEFAULT_CSS_FILES_EXTENSION = ".css";
@@ -37,20 +39,23 @@ public class ViewLoader {
     private ControllerManager controllerManager;
     private java.util.ResourceBundle globalResourceBundle;
 
-    public ViewLoader() {
+    private ViewCacheManager viewCacheManager;
+    private Map<Class, View> viewsCache = new ConcurrentHashMap<>();
+
+    public ViewManager() {
         this(new ControllerManager());
     }
 
 
-    public ViewLoader(ControllerManager controllerManager) {
+    public ViewManager(ControllerManager controllerManager) {
         this(controllerManager, null);
     }
 
-    public ViewLoader(ControllerManager controllerManager, ResourceBundle globalResourceBundle) {
+    public ViewManager(ControllerManager controllerManager, ResourceBundle globalResourceBundle) {
         this.controllerManager = controllerManager;
         this.globalResourceBundle = globalResourceBundle;
         // define the factory to use when the controller is defined in .fxml file by fx:controller.
-        this.fxmlLoader.setControllerFactory(this.controllerManager::createController);
+        this.fxmlLoader.setControllerFactory(this.controllerManager::getController);
     }
 
     /**
@@ -65,7 +70,7 @@ public class ViewLoader {
 
     /**
      * Load the rootNode node hierarchy from a given fxml to a {@link Parent} node.
-     * Using a default {@link FXMLLoader} defined in {@link ViewLoader}.
+     * Using a default {@link FXMLLoader} defined in {@link ViewManager}.
      *
      * @param fxmlFile
      * @return a {@link Parent} node.
@@ -126,17 +131,14 @@ public class ViewLoader {
      * @param controllerClass a class annotated with @{@link FXController} that define a {@link View} configuration.
      * @return a {@link View} object.
      */
-    public View loadView(Class controllerClass) {
-        assertAnnotationExist(controllerClass, FXController.class);
-        View view = createView(controllerClass);
-        //injectViews(view);
-        //postInjections(view);
-        return view;
-    }
-
     private View createView(Class controllerClass) {
-        //TODO: check if the view already created (in a cache) then return it, otherwise create one
+        assertAnnotationExist(controllerClass, FXController.class);
         Object controller = this.getController(controllerClass);
+        // do the injections before calling loadRoot(), for the injected values to be available to the
+        // initialize() method called by FXMLLoader when loading the fxml.
+        injectViews(controller);
+        // other injections
+
         Parent rootNode = this.loadRoot(controllerClass);
         View view = new View(controller, rootNode);
         view.setTitle(this.getTitle(controllerClass));
@@ -146,27 +148,37 @@ public class ViewLoader {
         return view;
     }
 
-    private void injectViews(View toView) {
-        Field[] fields = toView.getController().getClass().getDeclaredFields();//TODO: add access inherited fields
-        Arrays.asList(fields).stream().filter(f -> f.getAnnotation(FXView.class) != null)
+    public View getView(Class controllerClass) {
+        // search for the view in the cache
+        View view = getViewCacheManager().getFromCache(controllerClass);
+        //if the view not found in the cache, then create new one and cache it.
+        if(view == null){
+            view = createView(controllerClass);
+            getViewCacheManager().putInCache(controllerClass, view);
+        }
+        return view;
+    }
+
+    private void injectViews(Object toController) {
+        Field[] fields = toController.getClass().getDeclaredFields();//TODO: add inherited fields
+        Arrays.asList(fields)
+                .stream()
+                .filter(f -> f.getAnnotation(FXView.class) != null)
                 .forEach(field -> {
                     try {
                         if (field.getType() != View.class) {
                             throw new RuntimeException(FXView.class.getName() + " annotation can only used on fields of type " + View.class.getName());
                         }
-                        View view = toView;
-                        FXView viewAnnotation = field.getAnnotation(FXView.class);
-                        Class controllerClass = viewAnnotation.value();
-                        if (controllerClass != FXView.ThisClass.class) {
-                            view = this.createView(controllerClass);
-                        }
+                        FXView fxViewAnnotation = field.getAnnotation(FXView.class);
+                        Class controllerClass = fxViewAnnotation.value();
+                        View view = getView(controllerClass);
                         System.out.println("inject view of class: " + controllerClass.getSimpleName() + " to: " + field.getName());//TODO: delete me
                         boolean canAccess = field.isAccessible();
                         field.setAccessible(true);// to access private fields
-                        field.set(toView.getController(), view);
+                        field.set(toController, view);
                         field.setAccessible(canAccess);
                     } catch (IllegalAccessException e) {
-                        throw new RuntimeException("Injection of view: " + field.getName() + " to controller: " + toView.getController() + " has failed!!!", e);
+                        throw new RuntimeException("Injection of view: " + field.getName() + " to controller: " + toController + " has failed!!!", e);
                     }
                 });
     }
@@ -219,7 +231,7 @@ public class ViewLoader {
                             return;
                         }
                         Class controllerClass = field.getAnnotation(ShowView.class).controllerClass();
-                        View view = this.loadView(controllerClass);
+                        View view = this.getView(controllerClass);
                         System.out.println("@ShowView: " + view);//TODO: delete me
                         int showMode = field.getAnnotation(ShowView.class).showIn();
                         switch (showMode) {
@@ -308,7 +320,7 @@ public class ViewLoader {
      * @return a controller object of the given value class.
      */
     private Object getController(Class<?> controllerClass) {
-        return controllerManager.createController(controllerClass);
+        return controllerManager.getController(controllerClass);
     }
 
     /**
@@ -434,7 +446,7 @@ public class ViewLoader {
      */
     public void setControllerManager(ControllerManager controllerManager) {
         this.controllerManager = controllerManager;
-        fxmlLoader.setControllerFactory(this.controllerManager::createController);
+        fxmlLoader.setControllerFactory(this.controllerManager::getController);
     }
 
     /**
@@ -446,5 +458,23 @@ public class ViewLoader {
      */
     public void setGlobalResourceBundle(ResourceBundle globalResourceBundle) {
         this.globalResourceBundle = globalResourceBundle;
+    }
+
+    private ViewCacheManager getViewCacheManager() {
+        return viewCacheManager == null ? this : viewCacheManager;
+    }
+
+    public void setViewCacheManager(ViewCacheManager viewCacheManager) {
+        this.viewCacheManager = viewCacheManager;
+    }
+
+    @Override
+    public void putInCache(Class controllerClass, View view) {
+        viewsCache.put(controllerClass, view);
+    }
+
+    @Override
+    public View getFromCache(Class controllerClass) {
+        return viewsCache.get(controllerClass);
     }
 }
