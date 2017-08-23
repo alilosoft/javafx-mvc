@@ -28,7 +28,6 @@ package com.midrar.fx.mvc.view;
 
 import javafx.beans.property.*;
 import javafx.geometry.NodeOrientation;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -49,12 +48,14 @@ import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 /**
  */
 @Data
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
 public class View<C> {
+    private ViewFactory viewFactory = ViewFactory.getInstance();
     @NonNull
+    private Class controllerClass;
+
     private C controller;
-    @NonNull
     private Parent rootNode;
     private String title;
     private List<Image> icons;
@@ -62,6 +63,17 @@ public class View<C> {
 
     private StageConfigurer stageConfigurer;
     private BooleanProperty isShown = new SimpleBooleanProperty(); ;
+
+    public View(Class controllerClass) {
+        this.controllerClass = controllerClass;
+        this.controller = (C) viewFactory.getController(controllerClass);
+        this.rootNode = viewFactory.loadRoot(controllerClass);
+        this.title = viewFactory.getTitle(controllerClass);
+        this.icons = viewFactory.getIcons(controllerClass);
+        this.cssUrls =  viewFactory.getCssUrls(controllerClass);
+        this.stageConfigurer = viewFactory.getStageConfigurer(controllerClass);
+        viewFactory.putInCache(controllerClass, this);
+    }
 
     public void showInStage(Stage stage) {
         if(isShown.get()){
