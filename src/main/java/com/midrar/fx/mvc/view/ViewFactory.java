@@ -24,7 +24,9 @@ import java.util.stream.Collectors;
 
 import static com.midrar.fx.mvc.utils.Asserts.assertAnnotationExist;
 
-public class ViewManager implements ViewCacheManager{
+class ViewFactory implements ViewCacheManager {
+
+    private static final ViewFactory INSTANCE = new ViewFactory();
 
     private static final String CONTROLLER_CLASS_NAME_SUFFIX_CONVENTION = "Controller";
     private static final String DEFAULT_FXML_FILES_EXTENSION = ".fxml";
@@ -32,30 +34,19 @@ public class ViewManager implements ViewCacheManager{
     private String fxmlFilesExtension = DEFAULT_FXML_FILES_EXTENSION;
     private String cssFilesExtension = DEFAULT_CSS_FILES_EXTENSION;
 
-    private final int DEFAULT_SCENE_HEIGHT = 350;
-    private final int DEFAULT_SCENE_WIDTH = 450;
-
     private FXMLLoader fxmlLoader = new FXMLLoader();
-    private ControllerManager controllerManager;
-    private java.util.ResourceBundle globalResourceBundle;
+    private ControllerManager controllerManager = ControllerManager.getInstance();
 
     private ViewCacheManager viewCacheManager;
     private Map<Class, View> viewsCache = new ConcurrentHashMap<>();
 
-    public ViewManager() {
-        this(new ControllerManager());
+    public static ViewFactory getInstance() {
+        return INSTANCE;
     }
 
-
-    public ViewManager(ControllerManager controllerManager) {
-        this(controllerManager, null);
-    }
-
-    public ViewManager(ControllerManager controllerManager, ResourceBundle globalResourceBundle) {
-        this.controllerManager = controllerManager;
-        this.globalResourceBundle = globalResourceBundle;
-        // define the factory to use when the controller is defined in .fxml file by fx:controller.
-        this.fxmlLoader.setControllerFactory(this.controllerManager::getController);
+    private ViewFactory() {
+        // define the factory to use by fxmlLoader when the controller is defined in .fxml file by fx:controller.
+        fxmlLoader.setControllerFactory(controllerManager::getController);
     }
 
     /**
@@ -70,7 +61,7 @@ public class ViewManager implements ViewCacheManager{
 
     /**
      * Load the rootNode node hierarchy from a given fxml to a {@link Parent} node.
-     * Using a default {@link FXMLLoader} defined in {@link ViewManager}.
+     * Using a default {@link FXMLLoader} defined in {@link ViewFactory}.
      *
      * @param fxmlFile
      * @return a {@link Parent} node.
@@ -136,11 +127,13 @@ public class ViewManager implements ViewCacheManager{
         Object controller = this.getController(controllerClass);
         // do the injections before calling loadRoot(), for the injected values to be available to the
         // initialize() method called by FXMLLoader when loading the fxml.
-        injectViews(controller);
+        //injectViews(controller);
         // other injections
 
-        Parent rootNode = this.loadRoot(controllerClass);
-        View view = new View(controller, rootNode);
+        //Parent rootNode = this.loadRoot(controllerClass);
+        View view = new View(controllerClass);
+        view.setController(this.getController(controllerClass));
+        view.setRootNode(this.loadRoot(controllerClass));
         view.setTitle(this.getTitle(controllerClass));
         view.setIcons(this.getIcons(controllerClass));
         view.setCssUrls(this.getCssUrls(controllerClass));
@@ -152,9 +145,10 @@ public class ViewManager implements ViewCacheManager{
         // search for the view in the cache
         View view = getViewCacheManager().getFromCache(controllerClass);
         //if the view not found in the cache, then create new one and cache it.
-        if(view == null){
+        if (view == null) {
             view = createView(controllerClass);
             getViewCacheManager().putInCache(controllerClass, view);
+            injectViews(view.getController());
         }
         return view;
     }
@@ -319,7 +313,7 @@ public class ViewManager implements ViewCacheManager{
      * @param controllerClass
      * @return a controller object of the given value class.
      */
-    private Object getController(Class<?> controllerClass) {
+    Object getController(Class<?> controllerClass) {
         return controllerManager.getController(controllerClass);
     }
 
@@ -334,7 +328,7 @@ public class ViewManager implements ViewCacheManager{
         I18n i18nAnnotation = controllerClass.getAnnotation(I18n.class);
         // if no resource bundle is specified then return the default.
         if (i18nAnnotation == null) {
-            return globalResourceBundle;
+            return null;
         }
         String resourceBaseName = i18nAnnotation.value();
         try {
@@ -350,7 +344,7 @@ public class ViewManager implements ViewCacheManager{
      * @param controllerClass
      * @return
      */
-    private String getTitle(Class<?> controllerClass) {
+    String getTitle(Class<?> controllerClass) {
         Decoration decorationAnnotation = controllerClass.getAnnotation(Decoration.class);
         if (decorationAnnotation == null) {
             return "";
@@ -364,7 +358,7 @@ public class ViewManager implements ViewCacheManager{
      * @param controllerClass
      * @return
      */
-    private List<Image> getIcons(Class<?> controllerClass) {
+    List<Image> getIcons(Class<?> controllerClass) {
         Decoration decorationAnnotation = controllerClass.getAnnotation(Decoration.class);
         if (decorationAnnotation == null) {
             return null;
@@ -387,7 +381,7 @@ public class ViewManager implements ViewCacheManager{
      *
      * @param controllerClass
      */
-    private List<String> getCssUrls(Class<?> controllerClass) {
+    List<String> getCssUrls(Class<?> controllerClass) {
         CSS cssAnnotation = controllerClass.getAnnotation(CSS.class);
         if (cssAnnotation == null) {
             return null;
@@ -413,7 +407,7 @@ public class ViewManager implements ViewCacheManager{
      * @param controllerClass
      * @return StageConfigurer object.
      */
-    private StageConfigurer getStageConfigurer(Class<?> controllerClass) {
+    StageConfigurer getStageConfigurer(Class<?> controllerClass) {
         Stage stageAnnotation = controllerClass.getAnnotation(Stage.class);
         if (stageAnnotation == null) {
             return null;
@@ -427,7 +421,6 @@ public class ViewManager implements ViewCacheManager{
                 .fullScreenExitHint(stageAnnotation.fullScreenExitHint())
                 .alwaysOnTop(stageAnnotation.alwaysOnTop())
                 .iconified(stageAnnotation.iconified());
-
     }
 
     /**
@@ -441,23 +434,11 @@ public class ViewManager implements ViewCacheManager{
 
     /**
      * Set the {@link ControllerManager} responsible for managing controllers creation.
-     *
      * @param controllerManager
      */
     public void setControllerManager(ControllerManager controllerManager) {
         this.controllerManager = controllerManager;
         fxmlLoader.setControllerFactory(this.controllerManager::getController);
-    }
-
-    /**
-     * Set a global resource bundle to be used by default when loading fxml files.
-     * Note that this resource bundle will be used only if not specified explicitly by @{@link FXController},
-     * annotation for a given value class.
-     *
-     * @param globalResourceBundle
-     */
-    public void setGlobalResourceBundle(ResourceBundle globalResourceBundle) {
-        this.globalResourceBundle = globalResourceBundle;
     }
 
     private ViewCacheManager getViewCacheManager() {
@@ -470,11 +451,20 @@ public class ViewManager implements ViewCacheManager{
 
     @Override
     public void putInCache(Class controllerClass, View view) {
-        viewsCache.put(controllerClass, view);
+        if (viewCacheManager != null) {
+            viewCacheManager.putInCache(controllerClass, view);
+        } else {
+            viewsCache.put(controllerClass, view);
+        }
+
     }
 
     @Override
     public View getFromCache(Class controllerClass) {
-        return viewsCache.get(controllerClass);
+        if (viewCacheManager != null) {
+            return viewCacheManager.getFromCache(controllerClass);
+        } else {
+            return viewsCache.get(controllerClass);
+        }
     }
 }
