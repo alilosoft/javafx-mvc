@@ -66,7 +66,7 @@ class ViewFactory implements ViewCacheManager {
      * @param fxmlFile
      * @return a {@link Parent} node.
      */
-    public Node loadFxml(URL fxmlFile) {
+    public Parent loadFxml(URL fxmlFile) {
         return loadFxml(fxmlFile, null);
     }
 
@@ -118,18 +118,16 @@ class ViewFactory implements ViewCacheManager {
      * Create and return a {@link View} object defined by a controller class annotated with @{@link FXController}, and set the
      * values of all its fields (see: {@link View}) then inject any @{@link OnAction}, @{@link ShowView} or @{@link FXView} to
      * the corresponding controller object.
-     *
      * @param controllerClass a class annotated with @{@link FXController} that define a {@link View} configuration.
      * @return a {@link View} object.
      */
     private View createView(Class controllerClass) {
         assertAnnotationExist(controllerClass, FXController.class);
         Object controller = this.getController(controllerClass);
-        // do the injections before calling loadRoot(), for the injected values to be available to the
-        // initialize() method called by FXMLLoader when loading the fxml.
+        // do the injections before calling loadRoot(), for the injected values to be available
+        // to the initialize() method called by FXMLLoader when loading the root node.
         //injectViews(controller);
         // other injections
-
         //Parent rootNode = this.loadRoot(controllerClass);
         View view = new View(controllerClass);
         view.setController(this.getController(controllerClass));
@@ -143,12 +141,12 @@ class ViewFactory implements ViewCacheManager {
 
     public View getView(Class controllerClass) {
         // search for the view in the cache
-        View view = getViewCacheManager().getFromCache(controllerClass);
-        //if the view not found in the cache, then create new one and cache it.
+        View view = getFromCache(controllerClass);
+        //if the view not found in the cache, then create new one.
         if (view == null) {
-            view = createView(controllerClass);
-            getViewCacheManager().putInCache(controllerClass, view);
-            injectViews(view.getController());
+            view = new View(controllerClass);
+            // caching the new view is done by its constructor, so don't worry ;)
+            //putInCache(controllerClass, view);
         }
         return view;
     }
@@ -320,13 +318,11 @@ class ViewFactory implements ViewCacheManager {
     /**
      * Get the resource bundle base name if exist, from the @{@link I18n} annotation
      * and return a resource bundle using the default local.
-     *
      * @param controllerClass
      * @return
      */
     private ResourceBundle getResourceBundle(Class<?> controllerClass) {
         I18n i18nAnnotation = controllerClass.getAnnotation(I18n.class);
-        // if no resource bundle is specified then return the default.
         if (i18nAnnotation == null) {
             return null;
         }
@@ -423,28 +419,6 @@ class ViewFactory implements ViewCacheManager {
                 .iconified(stageAnnotation.iconified());
     }
 
-    /**
-     * Set a custom {@link FXMLLoader}
-     *
-     * @param fxmlLoader
-     */
-    public void setFxmlLoader(FXMLLoader fxmlLoader) {
-        this.fxmlLoader = fxmlLoader;
-    }
-
-    /**
-     * Set the {@link ControllerManager} responsible for managing controllers creation.
-     * @param controllerManager
-     */
-    public void setControllerManager(ControllerManager controllerManager) {
-        this.controllerManager = controllerManager;
-        fxmlLoader.setControllerFactory(this.controllerManager::getController);
-    }
-
-    private ViewCacheManager getViewCacheManager() {
-        return viewCacheManager == null ? this : viewCacheManager;
-    }
-
     public void setViewCacheManager(ViewCacheManager viewCacheManager) {
         this.viewCacheManager = viewCacheManager;
     }
@@ -456,15 +430,13 @@ class ViewFactory implements ViewCacheManager {
         } else {
             viewsCache.put(controllerClass, view);
         }
-
     }
 
     @Override
     public View getFromCache(Class controllerClass) {
         if (viewCacheManager != null) {
             return viewCacheManager.getFromCache(controllerClass);
-        } else {
-            return viewsCache.get(controllerClass);
         }
+        return viewsCache.get(controllerClass);
     }
 }
