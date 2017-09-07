@@ -4,49 +4,39 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TabPane prefHeight="497.0" prefWidth="554.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
-   <tabs>
-      <Tab text="View2">
-         <content>
-            <VBox fx:id="vbox" prefHeight="256.0" prefWidth="1537.0">
-               <children>
-                  <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="View2">
-                     <font>
-                        <Font size="30.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="helloLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="400.0" prefWidth="600.0" text="%hello" textAlignment="CENTER" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="AR BERKLEY" size="93.0" />
-                     </font>
-                  </Label>
-                  <HBox>
-                     <children>
-                        <Button fx:id="helloBtn" alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Say Hello!!!">
-                           <font>
-                              <Font size="28.0" />
-                           </font>
-                        </Button>
-                        <Separator maxWidth="1.7976931348623157E308" prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS" />
-                        <Button fx:id="showViewBtn" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show View1">
-                           <font>
-                              <Font size="23.0" />
-                           </font>
-                        </Button>
-                     </children>
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin>
-                  </HBox>
-               </children>
-            </VBox>
-         </content>
-      </Tab>
-   </tabs>
-</TabPane>
+<VBox fx:id="root" prefHeight="408.0" prefWidth="545.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="View2">
+         <font>
+            <Font size="30.0" />
+         </font>
+      </Label>
+      <Label fx:id="helloLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="400.0" prefWidth="600.0" text="%hello" textAlignment="CENTER" VBox.vgrow="ALWAYS">
+         <font>
+            <Font name="AR BERKLEY" size="93.0" />
+         </font>
+      </Label>
+      <HBox>
+         <children>
+            <Button fx:id="helloBtn" alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Say Hello!!!">
+               <font>
+                  <Font size="28.0" />
+               </font>
+            </Button>
+            <Separator maxWidth="1.7976931348623157E308" prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS" />
+            <Button fx:id="showView1Btn" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show View1">
+               <font>
+                  <Font size="23.0" />
+               </font>
+            </Button>
+         </children>
+         <VBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+</VBox>

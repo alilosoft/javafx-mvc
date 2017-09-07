@@ -8,12 +8,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AssertsTest {
     @Test(expected = RuntimeException.class)
     public void assertAnnotationExistNegatif() throws Exception {
-        Asserts.assertAnnotationExist(Class.class, FXController.class);
+        Asserts.assertAnnotation(Class.class, FXController.class);
     }
 
     @Test
     public void assertAnnotationExistPositif() throws Exception {
-        assertThat(Asserts.assertAnnotationExist(TestClass.class, FXController.class)).isNotNull();
+        assertThat(Asserts.assertAnnotation(TestClass.class, FXController.class)).isNotNull();
 
     }
 

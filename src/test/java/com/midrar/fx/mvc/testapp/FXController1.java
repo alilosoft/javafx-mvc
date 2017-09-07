@@ -17,27 +17,25 @@ import javafx.scene.layout.Pane;
 import java.util.ResourceBundle;
 
 
-@FXController(fxml = "fxml/view1.fxml", isDefinedInFxml = false)
+@FXController(fxml = "fxml/view1.fxml")
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")
+@Decoration(title = "FXView 1 Example", icons = {"icons/Home_16px.png", "icons/Home_24px.png"})
+@CSS("css/view1-style.css")
 public class FXController1 {
 
-    @FXView
-    private View thisView;
-
-    @FXView(controllerClass = FXController2.class)
-    private View fxView2;
-
-    @FXView(controllerClass = FxmlController.class)
-    private View fxmlView;
+    private ViewFactory viewFactory = ViewFactory.getInstance();
 
     @FXML
     private ResourceBundle resources;
 
-    @FXML
-    private TabPane rootTabPane;
+    //@FXView(FXController2.class)
+    private View fxView2;
+
+    //@FXView(FxmlController.class)
+    private View helloView;
 
     @FXML
-    private Pane tab2;
+    private TabPane rootTabPane;
 
     @FXML
     private Button helloBtn;
@@ -46,46 +44,35 @@ public class FXController1 {
     private Button showView2Btn;
 
     @FXML
-    @ShowView(controllerClass = FXController2.class)
-    private Button showViewBtn;
-
-    @FXML
     private Label helloLabel;
 
-    @FXML
-    private Label viewNameLable;
-
-    @FXML
-    private RadioButton radioBtn;
-
-    StringProperty helloProperty = new SimpleStringProperty();
+    private StringProperty helloProperty = new SimpleStringProperty();
 
     private int clickCount = 0;
 
     public void initialize() {
         System.out.println("initializing...." + this);
-        System.out.println("resources bundle: " + resources);
+        if(fxView2 == null){
+            //fxView2 = viewFactory.createView(FXController2.class);
+        }
+        System.out.println("fxView2: " + fxView2);
 
         helloProperty.setValue(resources.getString("hello"));
         helloLabel.textProperty().bindBidirectional(helloProperty);
 
         helloBtn.setOnAction(this::hello);
 
+        //showView2Btn.disableProperty().bindBidirectional(fxView2.getIsShownInStage());
+
         showView2Btn.setOnAction(e -> {
             helloProperty.setValue("showView2 clicked: " + ++clickCount);
-            //fxView2.addToTabPane(rootTabPane);
+            fxView2.showInNewStage();
         });
-    }
-
-    @PostInjections
-    private void init() {
-        System.out.println("thisView: " + thisView + " fxView2: " + fxView2);
-        showView2Btn.disableProperty().bindBidirectional(fxView2.getIsShown());
     }
 
     public void hello(ActionEvent event) {
         helloProperty.setValue("hello() called");
-        //fxmlView.showInNewStage();
+        //helloView.showInNewStage();
     }
 
     public void hello(String v) {

@@ -7,14 +7,22 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Class responsible for managing controllers, (instantiating, parsing annotations)
  */
-public class ControllerManager implements ControllerCacheManager{
-    //TODO: search for @FXView annotation and inject the controller instance to the controllerClass instance and vice versa.
+public class ControllerManager implements ControllerCacheManager {
+    private static final ControllerManager INSTANCE = new ControllerManager();
+
     private ControllerFactory controllerFactory;
-    private boolean enableCaching = true;
+    private boolean enableCaching = false;
     private Map<Class, Object> controllersCache = new ConcurrentHashMap<>();
+    private ControllerCacheManager controllerCacheManager;
+
+    public static ControllerManager getInstance(){
+        return INSTANCE;
+    }
+
+    private ControllerManager() {}
 
     /**
-     * Provide your own factory to this manager if you want a custom instance management.</br>
+     * Provide your own factory to this manager if you want a custom instances management.</br>
      * The {@link ControllerFactory} is a {@link FunctionalInterface}, so you can pass a lambda or a method reference here.
      * for example: if you use a dependency management framework you can pass a the method responsible for creating or getting beans.
      * @param controllerFactory
@@ -49,27 +57,38 @@ public class ControllerManager implements ControllerCacheManager{
      * @param <T>             Type of the controller
      * @return a controller instance.
      */
-    public <T> T createController(Class<T> controllerClass) {
+    public <T> T getController(Class<T> controllerClass) {
         if (controllerFactory == null) {
             setControllerFactory(ControllerFactory.reflectionFactory());
         }
-        T controller = enableCaching ? getCachedController(controllerClass) : null;
+        T controller = enableCaching ? getFromCache(controllerClass) : null;
         if (controller == null) {
             controller = controllerFactory.create(controllerClass);
             if (enableCaching) {
-                cashController(controllerClass, controller);
+                putInCache(controllerClass, controller);
             }
         }
         return controller;
     }
 
+    public void setControllerCacheManager(ControllerCacheManager controllerCacheManager) {
+        this.controllerCacheManager = controllerCacheManager;
+    }
+
     @Override
-    public <T> T getCachedController(Class<T> controllerClass) {
+    public <T> T getFromCache(Class<T> controllerClass) {
+        if(controllerCacheManager != null){
+            return controllerCacheManager.getFromCache(controllerClass);
+        }
         return (T) controllersCache.get(controllerClass);
     }
 
     @Override
-    public void cashController(Class controllerClass, Object controller) {
-        controllersCache.putIfAbsent(controllerClass, controller);
+    public void putInCache(Class controllerClass, Object controller) {
+        if(controllerCacheManager != null){
+            controllerCacheManager.putInCache(controllerClass, controller);
+        }else{
+            controllersCache.put(controllerClass, controller);
+        }
     }
 }

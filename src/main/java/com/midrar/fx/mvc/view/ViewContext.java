@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  *
  */
-public class ViewContext {
+class ViewContext {
+
     private Map<Class, View> context = new ConcurrentHashMap<>();
 
     public View findView(Class controllerClass){
@@ -17,6 +18,7 @@ public class ViewContext {
     }
 
     public void registerView(View view){
-        context.putIfAbsent(view.getControllerClass(), view);
+        System.out.println("registering: "+view + " in: "+this);//TODO: delete me
+        context.putIfAbsent(view.getController().getClass(), view);
     }
 }

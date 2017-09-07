@@ -48,50 +48,47 @@ import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 /**
  */
 @Data
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
-public class View<C> {
-    private ViewFactory viewFactory = ViewFactory.getInstance();
+@ToString(of = "controller")
+public class View<T> {
+    private ViewContext viewContext;
     @NonNull
-    private Class controllerClass;
-
-    private C controller;
+    private T controller;
+    @NonNull
     private Parent rootNode;
+
     private String title;
     private List<Image> icons;
     private List<String> cssUrls;
-
     private StageConfigurer stageConfigurer;
-    private BooleanProperty isShown = new SimpleBooleanProperty(); ;
 
-    public View(Class controllerClass) {
-        this.controllerClass = controllerClass;
-        this.controller = (C) viewFactory.getController(controllerClass);
-        this.rootNode = viewFactory.loadRoot(controllerClass);
-        this.title = viewFactory.getTitle(controllerClass);
-        this.icons = viewFactory.getIcons(controllerClass);
-        this.cssUrls =  viewFactory.getCssUrls(controllerClass);
-        this.stageConfigurer = viewFactory.getStageConfigurer(controllerClass);
-        viewFactory.putInCache(controllerClass, this);
+    private BooleanProperty isShownInStage = new SimpleBooleanProperty();
+
+    void setViewContext(ViewContext viewContext) {
+        this.viewContext = viewContext;
+        this.viewContext.registerView(this);
     }
 
     public void showInStage(Stage stage) {
-        if(isShown.get()){
-            throw new RuntimeException(this +" is already shown!");
+
+        if (isShownInStage.get()) {
+            ((Stage) rootNode.getScene().getWindow()).toFront();
+            return;
         }
-        stage.setOnShown(e-> isShown.setValue(true));
-        stage.setOnHidden(e-> isShown.setValue(false));
+        stage.setOnShown(e -> isShownInStage.setValue(true));
+        stage.setOnHidden(e -> isShownInStage.setValue(false));
 
         Scene scene = rootNode.getScene();
         if (scene == null) {
             scene = new Scene(rootNode);
         }
 
-        if(Locale.getDefault().equals(new Locale("ar"))){
+        if (Locale.getDefault().equals(new Locale("ar"))) {
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         }
 
-        if (cssUrls != null){
+        if (cssUrls != null) {
             scene.getStylesheets().addAll(cssUrls);
         }
 
@@ -99,19 +96,19 @@ public class View<C> {
 
         stage.setScene(scene);
         stage.setTitle(title);
-        if(icons != null){
+        if (icons != null) {
             stage.getIcons().addAll(icons);
         }
 
-        if(stageConfigurer != null){
+        if (stageConfigurer != null) {
             stage = stageConfigurer.configure(stage);
         }
         stage.show();
     }
 
     public void showInNewStage() {
-        //TODO: bug fix, prevent showing the same view in different stages.
-        if(rootNode.getScene() != null){
+        //TODO: fix bug => prevent showing the same view in different stages.
+        if (rootNode.getScene() != null) {
             //throw new RuntimeException("Same view can't be shown in multiple scenes!");
         }
         showInStage(new Stage());
@@ -121,6 +118,7 @@ public class View<C> {
      * Show this view in a new {@link Stage} configured by the passed {@link StageConfigurer}.
      * >Note: that the @{@link com.midrar.fx.mvc.view.Stage} if present, will be omitted, and the passed {@link StageConfigurer}
      * will take precedence off it.
+     *
      * @param stageConfigurer
      */
     public void showInNewStage(StageConfigurer stageConfigurer) {
@@ -128,9 +126,9 @@ public class View<C> {
         showInStage(new Stage());
     }
 
-    public void showInScene(Scene scene){
+    public void showInScene(Scene scene) {
         assertParameterNotNull(scene, "scene");
-        if(cssUrls != null) scene.getStylesheets().addAll(cssUrls);
+        if (cssUrls != null) scene.getStylesheets().addAll(cssUrls);
         scene.setRoot(rootNode);
     }
 
@@ -148,7 +146,7 @@ public class View<C> {
         if (icon.isPresent()) {
             tab.setGraphic(new ImageView(icon.get()));
         }
-        if (cssUrls != null){
+        if (cssUrls != null) {
             tabPane.getStylesheets().addAll(cssUrls);
         }
         tabPane.getTabs().add(tab);
