@@ -15,7 +15,7 @@ public interface ControllerFactory {
                 try {
                     return clazz.newInstance();
                 } catch (InstantiationException | IllegalAccessException e) {
-                    throw new RuntimeException("Can't setStartView new instance from: "+ clazz.getCanonicalName(), e);
+                    throw new RuntimeException("Can't create controller instance from: "+ clazz.getCanonicalName(), e);
                 }
             }
         };

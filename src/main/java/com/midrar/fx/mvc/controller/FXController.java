@@ -48,7 +48,7 @@ public @interface FXController {
 
     /**
      *Set this flag to false to inform the ViewManager that the controller is not defined in the .fxml file.
-     * In that case the ViewManager will delegate the controller instantiation to the provided {@link ControllerManager},
+     * In that case the ViewManager will delegate the controller instantiation to the provided {@link ControllerManagerImpl},
      * and passes the created instance to te {@link javafx.fxml.FXMLLoader} implicitly.
      *>Note: that if this flag is not set to false, and no controller is defined in .fxml file then the loaded view won't have
      * any controller.

@@ -35,7 +35,7 @@ public class FXController2 {
     public void initialize(){
         System.out.println("initializing...." + this);
         if(fxView1 == null){
-            //fxView1 = ViewFactory.getInstance().createView(FXController1.class);
+            //fxView1 = ViewFactoryImp.getInstance().createView(FXController1.class);
         }
 
         System.out.println("fxView1: " + fxView1);

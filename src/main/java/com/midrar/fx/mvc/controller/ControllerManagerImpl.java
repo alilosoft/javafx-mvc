@@ -7,19 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Class responsible for managing controllers, (instantiating, parsing annotations)
  */
-public class ControllerManager implements ControllerCacheManager {
-    private static final ControllerManager INSTANCE = new ControllerManager();
+public class ControllerManagerImpl implements ControllerCacheManager {
+    private static final ControllerManagerImpl INSTANCE = new ControllerManagerImpl();
 
     private ControllerFactory controllerFactory;
     private boolean enableCaching = false;
     private Map<Class, Object> controllersCache = new ConcurrentHashMap<>();
     private ControllerCacheManager controllerCacheManager;
 
-    public static ControllerManager getInstance(){
+    public static ControllerManagerImpl getInstance(){
         return INSTANCE;
     }
 
-    private ControllerManager() {}
+    private ControllerManagerImpl() {}
 
     /**
      * Provide your own factory to this manager if you want a custom instances management.</br>

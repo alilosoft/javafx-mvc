@@ -1,7 +1,5 @@
 package com.midrar.fx.mvc.testapp;
 
-import com.midrar.fx.mvc.controller.PostInjections;
-import com.midrar.fx.mvc.controller.ShowView;
 import com.midrar.fx.mvc.view.*;
 import com.midrar.fx.mvc.controller.FXController;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,9 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.Pane;
 
 import java.util.ResourceBundle;
 
@@ -23,7 +19,7 @@ import java.util.ResourceBundle;
 @CSS("css/view1-style.css")
 public class FXController1 {
 
-    private ViewFactory viewFactory = ViewFactory.getInstance();
+    private ViewFactory viewFactory = ViewFactoryImp.getInstance();
 
     @FXML
     private ResourceBundle resources;
