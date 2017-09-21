@@ -1,7 +1,6 @@
 package com.midrar.fx.mvc.view;
 
 import com.midrar.fx.mvc.controller.*;
-import com.midrar.fx.mvc.utils.Asserts;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ButtonBase;
@@ -19,9 +18,9 @@ import java.util.stream.Collectors;
 import static com.midrar.fx.mvc.utils.Asserts.assertAnnotation;
 import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 
-public class ViewFactoryImp implements ViewFactory {
+public class Views implements ViewFactory {
 
-    private static final ViewFactory INSTANCE = new ViewFactoryImp();
+    private static final ViewFactory INSTANCE = new Views();
 
     private static final String CONTROLLER_CLASS_NAME_SUFFIX_CONVENTION = "Controller";
     private static final String DEFAULT_FXML_FILES_EXTENSION = ".fxml";
@@ -30,7 +29,7 @@ public class ViewFactoryImp implements ViewFactory {
     private String cssFilesExtension = DEFAULT_CSS_FILES_EXTENSION;
     private ControllerFactory controllerFactory;
 
-    private ViewFactoryImp() {
+    private Views() {
         controllerFactory = ControllerFactory.reflectionFactory();
     }
 
@@ -40,10 +39,11 @@ public class ViewFactoryImp implements ViewFactory {
 
     public void setControllerFactory(ControllerFactory controllerFactory) {
         this.controllerFactory = controllerFactory;
+
     }
 
     @Override
-    public  <T> View<T> createView(Class<T> controllerClass){
+    synchronized public  <T> View<T> createView(Class<T> controllerClass){
         assertParameterNotNull(controllerClass, "controllerClass");
         // assert that the class is annotated with @FXController
         assertAnnotation(controllerClass, FXController.class);
@@ -172,7 +172,7 @@ public class ViewFactoryImp implements ViewFactory {
      * @return a {@link Parent} node.
      */
     private Parent loadRoot(Object controller) {
-        Asserts.assertParameterNotNull(controller, "controller");
+        assertParameterNotNull(controller, "controller");
         Class controllerClass = controller.getClass();
         FXController fxController = assertAnnotation(controllerClass, FXController.class);
         FXMLLoader fxmlLoader = new FXMLLoader();
@@ -189,9 +189,9 @@ public class ViewFactoryImp implements ViewFactory {
         // parse the .fxml file url defined by @FXController
         URL fxmlUrl = parseFxmlFileUrl(controllerClass);
         fxmlLoader.setLocation(fxmlUrl);
-        // parse the resource bundle defined by @FXController
-        ResourceBundle bundle = createResourceBundle(controllerClass);
-        fxmlLoader.setResources(bundle);
+        // parse and set the resource bundle if defined by @FXController
+        Optional<ResourceBundle> bundle = createResourceBundle(controllerClass);
+        bundle.ifPresent(fxmlLoader::setResources);
         try {
             return fxmlLoader.load();
         } catch (Exception e) {
@@ -201,7 +201,6 @@ public class ViewFactoryImp implements ViewFactory {
 
     /**
      * Utility class to parse the fxml file url from the @{@link FXController} annotation.
-     *
      * @param controllerClass
      * @return fxml file url.
      */
@@ -239,12 +238,12 @@ public class ViewFactoryImp implements ViewFactory {
     /**
      * Try to parses the fxml file name from value class name.
      *
-     * @param viewClass
+     * @param controllerClass
      * @return fxml file name.
      */
-    private String deduceFxmlName(Class<?> viewClass) {
+    private String deduceFxmlName(Class<?> controllerClass) {
         String fxmlName = "";
-        String viewClassName = viewClass.getSimpleName();
+        String viewClassName = controllerClass.getSimpleName();
         if (viewClassName.endsWith(CONTROLLER_CLASS_NAME_SUFFIX_CONVENTION)) {
             fxmlName = viewClassName.substring(0, viewClassName.length() - CONTROLLER_CLASS_NAME_SUFFIX_CONVENTION.length());
         }
@@ -257,14 +256,14 @@ public class ViewFactoryImp implements ViewFactory {
      * @param controllerClass
      * @return
      */
-    private ResourceBundle createResourceBundle(Class<?> controllerClass) {
+    private Optional<ResourceBundle> createResourceBundle(Class<?> controllerClass) {
         I18n i18nAnnotation = controllerClass.getAnnotation(I18n.class);
         if (i18nAnnotation == null) {
-            return null;
+            return Optional.empty();
         }
         String resourceBaseName = i18nAnnotation.value();
         try {
-            return ResourceBundle.getBundle(resourceBaseName);
+            return Optional.of(ResourceBundle.getBundle(resourceBaseName));
         } catch (Exception e) {
             throw new RuntimeException("Can't setStartView resource bundle: " + resourceBaseName + " defined by: " + controllerClass, e);
         }
@@ -293,7 +292,7 @@ public class ViewFactoryImp implements ViewFactory {
     private List<Image> createIcons(Class<?> controllerClass) {
         Decoration decorationAnnotation = controllerClass.getAnnotation(Decoration.class);
         if (decorationAnnotation == null) {
-            return null;
+            return Collections.EMPTY_LIST;
         }
         String[] icons = decorationAnnotation.icons();
         return Arrays.asList(icons).stream()
@@ -316,7 +315,7 @@ public class ViewFactoryImp implements ViewFactory {
     private List<String> parseCssUrls(Class<?> controllerClass) {
         CSS cssAnnotation = controllerClass.getAnnotation(CSS.class);
         if (cssAnnotation == null) {
-            return null;
+            return Collections.EMPTY_LIST;
         }
         return Arrays.asList(cssAnnotation.value()).stream()
                 .map(cssFileName -> {
@@ -339,20 +338,21 @@ public class ViewFactoryImp implements ViewFactory {
      * @param controllerClass
      * @return StageConfigurer object.
      */
-    private StageConfigurer createStageConfigurer(Class<?> controllerClass) {
+    private Optional<StageConfigurer> createStageConfigurer(Class<?> controllerClass) {
         Stage stageAnnotation = controllerClass.getAnnotation(Stage.class);
         if (stageAnnotation == null) {
-            return null;
+            return Optional.empty();
         }
-        return new StageConfigurer()
+        StageConfigurer stageConfigurer = new StageConfigurer()
                 .style(stageAnnotation.style())
                 .modality(stageAnnotation.modality())
+                .alwaysOnTop(stageAnnotation.alwaysOnTop())
                 .resizable(stageAnnotation.resizable())
                 .maximized(stageAnnotation.maximized())
+                .iconified(stageAnnotation.iconified())
                 .fullScreen(stageAnnotation.fullScreen())
-                .fullScreenExitHint(stageAnnotation.fullScreenExitHint())
-                .alwaysOnTop(stageAnnotation.alwaysOnTop())
-                .iconified(stageAnnotation.iconified());
+                .fullScreenExitHint(stageAnnotation.fullScreenExitHint());
+        return Optional.of(stageConfigurer);
     }
 
 }
