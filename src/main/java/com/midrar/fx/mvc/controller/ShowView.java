@@ -22,7 +22,7 @@ public @interface ShowView {//TODO: usage
     /**
      * Show the defined view in the same {@link javafx.stage.Stage} as this {@link View}.
      */
-    public static final int SHOW_IN_SAME_SCENE = 1;
+    public static final int SHOW_IN_SAME_STAGE = 1;
 
     /**
      * Specify a view defined by @{@link FXController} annotation to show when an {@link javafx.event.ActionEvent}
@@ -31,7 +31,7 @@ public @interface ShowView {//TODO: usage
     Class controllerClass();
 
     /**
-     * Define how the defined {@link View} is shown, SHOW_IN_NEW_STAGE or SHOW_IN_SAME_SCENE
+     * Define how the defined {@link View} is shown, SHOW_IN_NEW_STAGE or SHOW_IN_SAME_STAGE
      */
     int showIn() default SHOW_IN_NEW_STAGE;
 

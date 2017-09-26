@@ -4,7 +4,6 @@ import com.midrar.fx.mvc.controller.FXController;
 import com.midrar.fx.mvc.view.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 
 @FXController(fxml = "fxml/test.fxml")
@@ -28,7 +27,7 @@ public class FxmlController {
     @FXML
     private void hello(){
         System.out.println(" hello fx:controller");
-        fxView1.showInNewStage();
+        fxView1.showInStage();
     }
 
 

@@ -14,5 +14,7 @@ public @interface FXView {
     /**
      * TODO: doc
      */
-    Class value();
+    Class value() default ThisView.class;
+
+    class ThisView{}
 }

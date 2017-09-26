@@ -26,7 +26,12 @@
  */
 package com.midrar.fx.mvc.view;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -35,50 +40,53 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import lombok.*;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 
 /**
  */
 @Data
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
 @ToString(of = "controller")
 public class View<T> {
-    private ViewContext viewContext;
-    @NonNull
     private T controller;
-    @NonNull
     private Parent rootNode;
-
-    private String title;
-    private List<Image> icons;
-    private List<String> cssUrls;
-    private StageConfigurer stageConfigurer;
-
-    private BooleanProperty isShownInStage = new SimpleBooleanProperty();
+    private String title = "";
+    private List<Image> icons = Collections.EMPTY_LIST;
+    private List<String> cssUrls = Collections.EMPTY_LIST;
+    private Optional<StageConfigurer> stageConfigurer;
+    private Stage stage;
+    private ViewContext viewContext;
 
     void setViewContext(ViewContext viewContext) {
         this.viewContext = viewContext;
         this.viewContext.registerView(this);
     }
 
+    /**
+     * Show this {@link View} in the provided {@link Stage}.
+     * >Note: If this method is called directly from client code, and a stage configuration is defined by
+     * >@{@link com.midrar.fx.mvc.view.Stage} annotation, then that config will not be applied to the stage by this
+     * method.
+     */
     public void showInStage(Stage stage) {
-
-        if (isShownInStage.get()) {
-            ((Stage) rootNode.getScene().getWindow()).toFront();
-            return;
+        assertParameterNotNull(stage, "stage");
+        System.out.println("isShowing: "+ isShowing());
+        if (isShowing()) {
+            Stage currentStage = (Stage) rootNode.getScene().getWindow();
+            if(Objects.equals(stage, currentStage)){
+                stage.toFront();
+                return;
+            }else{
+                throw new RuntimeException("The "+this+" is already shown in another Stage!");
+            }
         }
-        stage.setOnShown(e -> isShownInStage.setValue(true));
-        stage.setOnHidden(e -> isShownInStage.setValue(false));
-
+        this.stage = stage;
         Scene scene = rootNode.getScene();
         if (scene == null) {
             scene = new Scene(rootNode);
@@ -87,50 +95,29 @@ public class View<T> {
         if (Locale.getDefault().equals(new Locale("ar"))) {
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         }
-
-        if (cssUrls != null) {
-            scene.getStylesheets().addAll(cssUrls);
-        }
-
-        scene.setFill(Color.TRANSPARENT);//TODO: show a transparent stage
-
+        scene.getStylesheets().clear();
+        scene.getStylesheets().addAll(cssUrls);
         stage.setScene(scene);
         stage.setTitle(title);
-        if (icons != null) {
-            stage.getIcons().addAll(icons);
-        }
-
-        if (stageConfigurer != null) {
-            stage = stageConfigurer.configure(stage);
-        }
+        stage.getIcons().clear();
+        stage.getIcons().addAll(icons);
+        //stageConfigurer.ifPresent(sc -> sc.configure(this.stage));//Throws an Exception if stage has been visible
         stage.show();
     }
 
-    public void showInNewStage() {
-        //TODO: fix bug => prevent showing the same view in different stages.
-        if (rootNode.getScene() != null) {
-            //throw new RuntimeException("Same view can't be shown in multiple scenes!");
-        }
-        showInStage(new Stage());
-    }
-
     /**
-     * Show this view in a new {@link Stage} configured by the passed {@link StageConfigurer}.
-     * >Note: that the @{@link com.midrar.fx.mvc.view.Stage} if present, will be omitted, and the passed {@link StageConfigurer}
-     * will take precedence off it.
-     *
-     * @param stageConfigurer
+     * Show this {@link View} in its own {@link Stage}.
+     * >Note: if a stage configuration is provided using the @{@link com.midrar.fx.mvc.view.Stage}
+     * annotation then it will be applied for the stage used to show this {@link View} .
      */
-    public void showInNewStage(StageConfigurer stageConfigurer) {
-        this.stageConfigurer = stageConfigurer;
-        showInStage(new Stage());
+    public void showInStage() {
+        if(stage == null){
+            stage = new Stage();
+            stageConfigurer.ifPresent(sc -> sc.configure(stage));
+        }
+        showInStage(stage);
     }
 
-    public void showInScene(Scene scene) {
-        assertParameterNotNull(scene, "scene");
-        if (cssUrls != null) scene.getStylesheets().addAll(cssUrls);
-        scene.setRoot(rootNode);
-    }
 
     public void addToPane(Pane pane) {
         assertParameterNotNull(pane, "pane");
@@ -140,16 +127,22 @@ public class View<T> {
     public void addToTabPane(TabPane tabPane) {
         assertParameterNotNull(tabPane, "tabPan");
         Tab tab = new Tab(title, rootNode);
-        Optional<Image> icon = icons.stream()// get the smallest icon from the icons list.
+        Optional<Image> icon = icons.stream()// find the smallest icon from the icons list.
                 .reduce((icon1, icon2) -> icon1.getHeight() < icon2.getHeight() ? icon1 : icon2);
 
         if (icon.isPresent()) {
             tab.setGraphic(new ImageView(icon.get()));
         }
-        if (cssUrls != null) {
-            tabPane.getStylesheets().addAll(cssUrls);
-        }
+        // or: using lambda
+        //icon.ifPresent(i -> tab.setGraphic(new ImageView(i)));
+        tabPane.getStylesheets().addAll(cssUrls);
         tabPane.getTabs().add(tab);
+    }
+
+    private boolean isShowing(){
+        return rootNode.getScene() != null &&
+                rootNode.getScene().getWindow() != null &&
+                rootNode.getScene().getWindow().isShowing();
     }
 
     public void close() {
@@ -160,5 +153,8 @@ public class View<T> {
          *  1- if the pane is a rootNode of a value (i.e: shown in tab or stage) then simply close the value that value;
          *  2- if the pane is part of a layout then try to remove with an appropriate animation effect.
          */
+        if(stage != null){
+            stage.close();
+        }
     }
 }

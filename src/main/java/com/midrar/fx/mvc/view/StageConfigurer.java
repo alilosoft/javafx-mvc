@@ -16,10 +16,6 @@ public class StageConfigurer {
     private Optional<StageStyle> style;
     private Optional<Modality> modality;
 
-    private Optional<String> title;
-    private List<Image> icons = Collections.EMPTY_LIST;
-
-
     private boolean iconified;
     private boolean fullScreen;
     private Optional<String> fullScreenExitHint;
@@ -31,14 +27,12 @@ public class StageConfigurer {
     public Stage configure(Stage stage){
         style.ifPresent(stage::initStyle);
         modality.ifPresent(stage::initModality);
-        title.ifPresent(stage::setTitle);
-        stage.getIcons().addAll(icons);
         stage.setAlwaysOnTop(alwaysOnTop);
         stage.setResizable(resizable);
         stage.setIconified(iconified);
         stage.setMaximized(maximized);
         stage.setFullScreen(fullScreen);
-        fullScreenExitHint.ifPresent(stage::setFullScreenExitHint);
+        fullScreenExitHint.filter(s -> !s.isEmpty()).ifPresent(stage::setFullScreenExitHint);
         return stage;
     }
 
@@ -49,16 +43,6 @@ public class StageConfigurer {
 
     public StageConfigurer modality(Modality modality){
         this.modality = Optional.of(modality);
-        return this;
-    }
-
-    public StageConfigurer title(String title){
-        this.title = Optional.of(title);
-        return this;
-    }
-
-    public StageConfigurer icons(List<Image> icons){
-        this.icons = icons;
         return this;
     }
 

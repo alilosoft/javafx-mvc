@@ -29,23 +29,25 @@ class ViewFactoryImpl implements ViewFactory {
     private String cssFilesExtension = DEFAULT_CSS_FILES_EXTENSION;
     private ControllerFactory controllerFactory;
 
-    public ViewFactoryImpl() {
+    ViewFactoryImpl() {
         this.controllerFactory = ControllerFactory.reflectionFactory();
     }
 
-    public ViewFactoryImpl(ControllerFactory controllerFactory) {
+    ViewFactoryImpl(ControllerFactory controllerFactory) {
         this.controllerFactory = controllerFactory;
     }
 
     @Override
-    synchronized public <T> View<T> createView(Class<T> controllerClass){
+    synchronized public <T> View<T> createView(Class<T> controllerClass) {
         assertParameterNotNull(controllerClass, "controllerClass");
         // assert that the class is annotated with @FXController
         assertAnnotation(controllerClass, FXController.class);
         Object controller = controllerFactory.create(controllerClass);
         Parent root = loadRoot(controller);
         // TODO: use a ViewBuilder to build the View.
-        View view = new View(controller, root);
+        View view = new View();
+        view.setController(controller);
+        view.setRootNode(root);
         view.setTitle(parseTitle(controllerClass));
         view.setIcons(createIcons(controllerClass));
         view.setCssUrls(parseCssUrls(controllerClass));
@@ -54,7 +56,7 @@ class ViewFactoryImpl implements ViewFactory {
     }
 
     //TODO: this method is intended to support @FXView injection (for later versions)
-    private <T> View<T> createViewInContext(Class<T> controllerClass, ViewContext viewContext){
+    private <T> View<T> createViewInContext(Class<T> controllerClass, ViewContext viewContext) {
         assertParameterNotNull(controllerClass, "controllerClass");
         assertParameterNotNull(viewContext, "viewContext");
         View view = createView(controllerClass);
@@ -76,22 +78,30 @@ class ViewFactoryImpl implements ViewFactory {
                         }
                         FXView fxViewAnnotation = field.getAnnotation(FXView.class);
                         Class controllerClass = fxViewAnnotation.value();
-                        //TODO: move to a method for re-utilisation
-                        ViewContext viewContext = toView.getViewContext();
-                        View view = viewContext.findView(controllerClass);
-                        if(view == null){
-                            view = createViewInContext(controllerClass, viewContext);
+                        View viewToInject = null;
+                        if (controllerClass == FXView.ThisView.class) {
+                            viewToInject = toView;
+                        } else {
+                            //TODO: move to a method for re-utilisation
+                            ViewContext viewContext = toView.getViewContext();
+                            if (viewContext != null) {
+                                viewToInject = viewContext.findView(controllerClass);
+                                if (viewToInject == null) {
+                                    viewToInject = createViewInContext(controllerClass, viewContext);
+                                }
+                            }
                         }
-                        System.out.println("inject: " + view + " to: " + toView);//TODO: delete me
+                        System.out.println("injecting: " + viewToInject + " to: " + toView);//TODO: delete me
                         boolean canAccess = field.isAccessible();
                         field.setAccessible(true);// to access private fields
-                        field.set(toView.getController(), view);
+                        field.set(toView.getController(), viewToInject);
                         field.setAccessible(canAccess);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException("Injection of view: " + field.getName() + " to: " + toView.getController() + " has failed!!!", e);
                     }
                 });
     }
+
     // TODO: add support to menu item and list selection events.
     private void injectOnActions(Object controller) {
         System.out.println("inject actions to controller: " + controller.getClass().getName() + " id:" + System.identityHashCode(controller));//TODO: delete me
@@ -123,6 +133,7 @@ class ViewFactoryImpl implements ViewFactory {
                     }
                 });
     }
+
     // TODO: add support in next versions.
     private void injectShowViews(Object controller) {
         System.out.println("inject showViews to controller: " + controller.getClass().getName() + " id:" + System.identityHashCode(controller));//TODO: delete me
@@ -146,11 +157,11 @@ class ViewFactoryImpl implements ViewFactory {
                         switch (showMode) {
                             case ShowView.SHOW_IN_NEW_STAGE:
                                 buttonBase.setOnAction(event -> {
-                                    view.showInNewStage();
+                                    view.showInStage();
                                 });
                                 break;
-                            case ShowView.SHOW_IN_SAME_SCENE:
-                                buttonBase.setOnAction(event -> view.showInScene(buttonBase.getScene()));
+                            case ShowView.SHOW_IN_SAME_STAGE:
+                                //buttonBase.setOnAction(event -> view.showInStage("caller view stage"));
                                 break;
                         }
                         System.out.println(field.getName() + ".onAction: " + buttonBase.getOnAction());
@@ -163,6 +174,7 @@ class ViewFactoryImpl implements ViewFactory {
 
     /**
      * Load the root node hierarchy of the {@link View} controlled by the given controller object.
+     *
      * @param controller
      * @return a {@link Parent} node.
      */
@@ -176,7 +188,7 @@ class ViewFactoryImpl implements ViewFactory {
             // then make sure that the controller factory used by fxmlLoader will return
             // the same controller instance of the View  being initialized.
             fxmlLoader.setControllerFactory(c -> controller);
-        }else{
+        } else {
             // if the controller class is not defined in the .fxml file then pass the controller instance
             // of the View being initialized to fxmlLoader.
             fxmlLoader.setController(controller);
@@ -190,19 +202,20 @@ class ViewFactoryImpl implements ViewFactory {
         try {
             return fxmlLoader.load();
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load node hierarchy from: "+fxmlUrl, e);
+            throw new RuntimeException("Unable to load node hierarchy from: " + fxmlUrl, e);
         }
     }
 
     /**
      * Parse the fxml file url from the @{@link FXController} annotation.
-     * @param controllerClass a class annotated with @{@link FXController}
+     *
+     * @param controllerClass: a class annotated with @{@link FXController}
      * @return fxml file url.
      */
     private URL parseFxmlFileUrl(Class<?> controllerClass) {
-        // get the value annotation
+        // forClass the value annotation
         FXController fxAnnotation = controllerClass.getAnnotation(FXController.class);
-        // get fxml file name value.
+        // forClass fxml file name value.
         String fxmlFileName = fxAnnotation.fxml();
         if (fxmlFileName.isEmpty()) {
             //Use convention over configuration to deduce the fxml file name.
@@ -232,6 +245,7 @@ class ViewFactoryImpl implements ViewFactory {
 
     /**
      * Try to parses the fxml file name from value class name.
+     *
      * @param controllerClass
      * @return fxml file name.
      */
@@ -247,6 +261,7 @@ class ViewFactoryImpl implements ViewFactory {
     /**
      * Get the resource bundle base name if exist, from the @{@link I18n} annotation
      * and return a resource bundle using the default local.
+     *
      * @param controllerClass a class annotated with @{@link FXController}
      * @return Optional<ResourceBundle>
      */
@@ -265,6 +280,7 @@ class ViewFactoryImpl implements ViewFactory {
 
     /**
      * Get the title defined by @{@link Decoration} annotation.
+     *
      * @param controllerClass: a class annotated with @{@link FXController}
      * @return the title defined by @{@link Decoration} if any
      */
@@ -278,6 +294,7 @@ class ViewFactoryImpl implements ViewFactory {
 
     /**
      * Get the icons defined by @{@link Decoration} annotation.
+     *
      * @param controllerClass: a class annotated with @{@link FXController}
      * @return list of icons defined by @{@link Decoration} or {@link Collections.EmptyList} if non.
      */
@@ -301,6 +318,7 @@ class ViewFactoryImpl implements ViewFactory {
 
     /**
      * Get CSS files URLs defined by @{@link CSS} annotation.
+     *
      * @param controllerClass: a class annotated with @{@link FXController}
      */
     private List<String> parseCssUrls(Class<?> controllerClass) {
@@ -325,6 +343,7 @@ class ViewFactoryImpl implements ViewFactory {
 
     /**
      * Create a {@link StageConfigurer} object using options defined by @{@link Stage} annotation.
+     *
      * @param controllerClass: a class annotated with @{@link FXController}
      * @return StageConfigurer object.
      */

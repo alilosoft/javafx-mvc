@@ -1,7 +1,7 @@
 package com.midrar.fx.mvc.testapp;
 
-import com.midrar.fx.mvc.view.ViewFactory;
-import com.midrar.fx.mvc.view.ViewFactoryImp;
+import com.midrar.fx.mvc.view.View;
+import com.midrar.fx.mvc.view.Views;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -14,12 +14,19 @@ public class TestApp extends Application {
         //controllerManager.setEnableCaching(false);
         //controllerManager.setControllerFactory(ControllerFactory.reflectionFactory());
         //StageConfigurer stageConfigurer = new StageConfigurer().resizable(false);
-        ViewFactory viewFactory = ViewFactoryImp.getInstance();
+        //Views.create(FXController1.class).showInStage(primaryStage);
 
-        viewFactory.createView(FXController1.class).showInNewStage();
-        //viewFactory.createView(FXController2.class).showInNewStage();
-        //viewFactory.createView(null).showInNewStage();
-        //ViewFactoryImp.createView(FXController1.class);
+        long s = System.currentTimeMillis();
+        //for(int i = 0; i < 50; i++)
+        View v = Views.create(FXController1.class);
+        v.showInStage();
+        System.out.println("takes: "+ (System.currentTimeMillis()-s));
+
+        //fxView1.showInStage(primaryStage);
+        //fxView1.showInStage(new Stage());
+        //viewFactory.createView(FXController2.class).showInStage();
+        //viewFactory.createView(null).showInStage();
+        //Views.createView(FXController1.class);
 
     }
 }

@@ -11,12 +11,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ViewFactoryImpTest {
 
-    ViewFactory viewFactory = ViewFactoryImp.getInstance();
-
     @Before
     public void setUp() throws Exception {
-        PlatformImpl.startup(() -> {});
-        assertThat(viewFactory).isNotNull();
+        PlatformImpl.startup(() -> System.out.println("Startup Platform"));
     }
 
     @After
@@ -24,9 +21,19 @@ public class ViewFactoryImpTest {
         PlatformImpl.exit();
     }
 
+    @Test(expected = NullPointerException.class)
+    public void createViewNullControllerClass() {
+        Views.create(null);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void createViewNoFXControllerAnnotation() throws Exception {
+        Views.create(String.class);
+    }
+
     @Test
     public void createView() {
-        View view = viewFactory.createView(FXController1.class);
+        View view = Views.create(FXController1.class);
         assertThat(view).isNotNull();
         assertThat(view.getController()).isNotNull();
         assertThat(view.getController()).isInstanceOf(FXController1.class);
@@ -34,9 +41,4 @@ public class ViewFactoryImpTest {
     }
 
 
-
-    @Test(expected = NullPointerException.class)
-    public void createViewWithNullController() {
-        viewFactory.createView(null);
-    }
 }

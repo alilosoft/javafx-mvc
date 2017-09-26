@@ -34,14 +34,17 @@ public class FXController2 {
 
     public void initialize(){
         System.out.println("initializing...." + this);
-        if(fxView1 == null){
-            //fxView1 = ViewFactoryImp.getInstance().createView(FXController1.class);
-        }
-
         System.out.println("fxView1: " + fxView1);
+        //helloBtn.setOnAction(e -> helloView.showInStage());
+        showView1Btn.setOnAction(e-> {
+            if(fxView1 == null){
+                fxView1 = Views.create(FXController1.class);
+            }
+            fxView1.showInStage();
+        });
+    }
 
-        //helloBtn.setOnAction(e -> helloView.showInNewStage());
-
-        showView1Btn.setOnAction(e-> fxView1.showInNewStage());
+    public void setFxView1(View fxView1) {
+        this.fxView1 = fxView1;
     }
 }

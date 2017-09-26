@@ -17,15 +17,16 @@ import java.util.ResourceBundle;
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")
 @Decoration(title = "FXView 1 Example", icons = {"icons/Home_16px.png", "icons/Home_24px.png"})
 @CSS("css/view1-style.css")
+@Stage(resizable = true)
 public class FXController1 {
-
-    private ViewFactory viewFactory = ViewFactoryImp.getInstance();
-
     @FXML
     private ResourceBundle resources;
 
+    //@FXView
+    private View thisView;
+
     //@FXView(FXController2.class)
-    private View fxView2;
+    private View<FXController2> fxView2;
 
     //@FXView(FxmlController.class)
     private View helloView;
@@ -47,31 +48,38 @@ public class FXController1 {
     private int clickCount = 0;
 
     public void initialize() {
-        System.out.println("initializing...." + this);
-        if(fxView2 == null){
-            //fxView2 = viewFactory.createView(FXController2.class);
-        }
-        System.out.println("fxView2: " + fxView2);
+        //System.out.println("initializing...." + this);
+        //System.out.println("fxView2: " + fxView2);
+        //System.out.println("thisView: "+ thisView);
+
 
         helloProperty.setValue(resources.getString("hello"));
-        helloLabel.textProperty().bindBidirectional(helloProperty);
-
+        helloProperty.bind(helloLabel.textProperty());
         helloBtn.setOnAction(this::hello);
 
-        //showView2Btn.disableProperty().bindBidirectional(fxView2.getIsShownInStage());
-
         showView2Btn.setOnAction(e -> {
-            helloProperty.setValue("showView2 clicked: " + ++clickCount);
-            fxView2.showInNewStage();
+            thisView = Views.forController(this);
+            helloLabel.setText("showView2 clicked: " + ++clickCount);
+            if(fxView2 == null){
+                fxView2 = Views.create(FXController2.class);
+                fxView2.getController().setFxView1(thisView);
+            }
+            //fxView2.showInStage(thisView.getStage());
+            thisView.close();
+            fxView2.showInStage();
         });
     }
 
     public void hello(ActionEvent event) {
-        helloProperty.setValue("hello() called");
-        //helloView.showInNewStage();
+        helloLabel.setText("hello() called");
+        //helloView.showInStage();
     }
 
     public void hello(String v) {
         System.out.println("hello(String)" + v);
+    }
+
+    public void setFxView2(View fxView2) {
+        this.fxView2 = fxView2;
     }
 }
