@@ -57,6 +57,8 @@ public class FXController1 {
         helloProperty.bind(helloLabel.textProperty());
         helloBtn.setOnAction(this::hello);
 
+
+
         showView2Btn.setOnAction(e -> {
             thisView = Views.forController(this);
             helloLabel.setText("showView2 clicked: " + ++clickCount);
@@ -64,15 +66,18 @@ public class FXController1 {
                 fxView2 = Views.create(FXController2.class);
                 fxView2.getController().setFxView1(thisView);
             }
-            //fxView2.showInStage(thisView.getStage());
-            thisView.close();
-            fxView2.showInStage();
+            //fxView2.show(thisView.getStage());
+            //thisView.close();
+            fxView2.show();
         });
     }
 
     public void hello(ActionEvent event) {
         helloLabel.setText("hello() called");
-        //helloView.showInStage();
+        if(helloView == null){
+            helloView = Views.create(FxmlController.class);
+        }
+        helloView.show();
     }
 
     public void hello(String v) {

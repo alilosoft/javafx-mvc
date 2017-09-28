@@ -59,8 +59,8 @@ public class View<T> {
     private String title = "";
     private List<Image> icons = Collections.EMPTY_LIST;
     private List<String> cssUrls = Collections.EMPTY_LIST;
-    private Optional<StageConfigurer> stageConfigurer;
-    private Stage stage;
+    private Optional<StageConfigurer> stageConfigurer = Optional.empty();
+    private Optional<Stage> stage = Optional.empty();
     private ViewContext viewContext;
 
     void setViewContext(ViewContext viewContext) {
@@ -76,32 +76,28 @@ public class View<T> {
      */
     public void showInStage(Stage stage) {
         assertParameterNotNull(stage, "stage");
-        System.out.println("isShowing: "+ isShowing());
         if (isShowing()) {
             Stage currentStage = (Stage) rootNode.getScene().getWindow();
             if(Objects.equals(stage, currentStage)){
-                stage.toFront();
+                currentStage.toFront();
                 return;
             }else{
                 throw new RuntimeException("The "+this+" is already shown in another Stage!");
             }
         }
-        this.stage = stage;
+        this.stage = Optional.of(stage);
         Scene scene = rootNode.getScene();
         if (scene == null) {
             scene = new Scene(rootNode);
+            scene.getStylesheets().addAll(cssUrls);
+            if (Locale.getDefault().equals(new Locale("ar"))) {
+                scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            }
         }
-
-        if (Locale.getDefault().equals(new Locale("ar"))) {
-            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-        }
-        scene.getStylesheets().clear();
-        scene.getStylesheets().addAll(cssUrls);
         stage.setScene(scene);
         stage.setTitle(title);
         stage.getIcons().clear();
         stage.getIcons().addAll(icons);
-        //stageConfigurer.ifPresent(sc -> sc.configure(this.stage));//Throws an Exception if stage has been visible
         stage.show();
     }
 
@@ -110,14 +106,13 @@ public class View<T> {
      * >Note: if a stage configuration is provided using the @{@link com.midrar.fx.mvc.view.Stage}
      * annotation then it will be applied for the stage used to show this {@link View} .
      */
-    public void showInStage() {
-        if(stage == null){
-            stage = new Stage();
-            stageConfigurer.ifPresent(sc -> sc.configure(stage));
+    public void show() {
+        if(!stage.isPresent()){
+            stage = Optional.of(new Stage());
+            stageConfigurer.ifPresent(sc -> sc.configure(stage.get()));
         }
-        showInStage(stage);
+        showInStage(stage.get());
     }
-
 
     public void addToPane(Pane pane) {
         assertParameterNotNull(pane, "pane");
@@ -153,8 +148,6 @@ public class View<T> {
          *  1- if the pane is a rootNode of a value (i.e: shown in tab or stage) then simply close the value that value;
          *  2- if the pane is part of a layout then try to remove with an appropriate animation effect.
          */
-        if(stage != null){
-            stage.close();
-        }
+        stage.ifPresent(s -> s.close());
     }
 }

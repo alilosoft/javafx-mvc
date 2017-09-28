@@ -35,12 +35,12 @@ public class FXController2 {
     public void initialize(){
         System.out.println("initializing...." + this);
         System.out.println("fxView1: " + fxView1);
-        //helloBtn.setOnAction(e -> helloView.showInStage());
+        //helloBtn.setOnAction(e -> helloView.show());
         showView1Btn.setOnAction(e-> {
             if(fxView1 == null){
                 fxView1 = Views.create(FXController1.class);
             }
-            fxView1.showInStage();
+            fxView1.show();
         });
     }
 

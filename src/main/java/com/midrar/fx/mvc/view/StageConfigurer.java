@@ -13,12 +13,12 @@ import java.util.Optional;
 
 
 public class StageConfigurer {
-    private Optional<StageStyle> style;
-    private Optional<Modality> modality;
+    private Optional<StageStyle> style = Optional.empty();
+    private Optional<Modality> modality = Optional.empty();
 
     private boolean iconified;
     private boolean fullScreen;
-    private Optional<String> fullScreenExitHint;
+    private Optional<String> fullScreenExitHint = Optional.empty();
 
     private boolean alwaysOnTop;
     private boolean maximized;

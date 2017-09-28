@@ -157,11 +157,11 @@ class ViewFactoryImpl implements ViewFactory {
                         switch (showMode) {
                             case ShowView.SHOW_IN_NEW_STAGE:
                                 buttonBase.setOnAction(event -> {
-                                    view.showInStage();
+                                    view.show();
                                 });
                                 break;
                             case ShowView.SHOW_IN_SAME_STAGE:
-                                //buttonBase.setOnAction(event -> view.showInStage("caller view stage"));
+                                //buttonBase.setOnAction(event -> view.show("caller view stage"));
                                 break;
                         }
                         System.out.println(field.getName() + ".onAction: " + buttonBase.getOnAction());

@@ -27,7 +27,7 @@ public class FxmlController {
     @FXML
     private void hello(){
         System.out.println(" hello fx:controller");
-        fxView1.showInStage();
+        fxView1.show();
     }
 
 
