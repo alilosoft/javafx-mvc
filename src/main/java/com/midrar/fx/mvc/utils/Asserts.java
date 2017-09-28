@@ -10,7 +10,7 @@ public class Asserts {
      * @param annotationClass
      * @return the annotation object.
      */
-    public static <T> T assertAnnotationExist(Class clazz, Class<T> annotationClass) {
+    public static <T> T assertAnnotation(Class clazz, Class<T> annotationClass) {
         T annotation = (T) clazz.getAnnotation(annotationClass);
         if (annotation == null) {
             throw new RuntimeException(clazz.getName() + " must have an annotation of type: " + annotationClass.getName());

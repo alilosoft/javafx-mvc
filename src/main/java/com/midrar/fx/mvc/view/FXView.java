@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TODO: doc
+ * TODO: add support in next version
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
@@ -14,10 +14,7 @@ public @interface FXView {
     /**
      * TODO: doc
      */
-    Class controllerClass() default ThisClass.class;
+    Class value() default ThisView.class;
 
-    /**
-     * A constant class used to informs the {@link ViewLoader} to use the same...TODO: doc
-     */
-    class ThisClass {}
+    class ThisView{}
 }

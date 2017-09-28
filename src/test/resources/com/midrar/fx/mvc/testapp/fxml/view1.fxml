@@ -10,8 +10,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<TabPane fx:id="rootTabPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<TabPane fx:id="rootTabPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+         fx:controller="com.midrar.fx.mvc.testapp.FXController1">
    <tabs>
       <Tab text="View1">
          <content>
@@ -36,11 +36,6 @@
                         </Button>
                         <Separator maxWidth="1.7976931348623157E308" prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS" />
                         <Button fx:id="showView2Btn" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show View2">
-                           <font>
-                              <Font size="23.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="showViewBtn" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show View">
                            <font>
                               <Font size="23.0" />
                            </font>

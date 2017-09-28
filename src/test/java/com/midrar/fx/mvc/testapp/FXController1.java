@@ -1,7 +1,5 @@
 package com.midrar.fx.mvc.testapp;
 
-import com.midrar.fx.mvc.controller.PostInjections;
-import com.midrar.fx.mvc.controller.ShowView;
 import com.midrar.fx.mvc.view.*;
 import com.midrar.fx.mvc.controller.FXController;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,34 +8,31 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.Pane;
 
 import java.util.ResourceBundle;
 
 
-@FXController(fxml = "fxml/view1.fxml", isDefinedInFxml = false)
+@FXController(fxml = "fxml/view1.fxml")
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")
+@Decoration(title = "FXView 1 Example", icons = {"icons/Home_16px.png", "icons/Home_24px.png"})
+@CSS("css/view1-style.css")
+@Stage(resizable = true)
 public class FXController1 {
-
-    @FXView
-    private View thisView;
-
-    @FXView(controllerClass = FXController2.class)
-    private View fxView2;
-
-    @FXView(controllerClass = FxmlController.class)
-    private View fxmlView;
-
     @FXML
     private ResourceBundle resources;
 
-    @FXML
-    private TabPane rootTabPane;
+    //@FXView
+    private View thisView;
+
+    //@FXView(FXController2.class)
+    private View<FXController2> fxView2;
+
+    //@FXView(FxmlController.class)
+    private View helloView;
 
     @FXML
-    private Pane tab2;
+    private TabPane rootTabPane;
 
     @FXML
     private Button helloBtn;
@@ -46,49 +41,50 @@ public class FXController1 {
     private Button showView2Btn;
 
     @FXML
-    @ShowView(controllerClass = FXController2.class)
-    private Button showViewBtn;
-
-    @FXML
     private Label helloLabel;
 
-    @FXML
-    private Label viewNameLable;
-
-    @FXML
-    private RadioButton radioBtn;
-
-    StringProperty helloProperty = new SimpleStringProperty();
+    private StringProperty helloProperty = new SimpleStringProperty();
 
     private int clickCount = 0;
 
     public void initialize() {
-        System.out.println("initializing...." + this);
-        System.out.println("resources bundle: " + resources);
+        //System.out.println("initializing...." + this);
+        //System.out.println("fxView2: " + fxView2);
+        //System.out.println("thisView: "+ thisView);
+
 
         helloProperty.setValue(resources.getString("hello"));
-        helloLabel.textProperty().bindBidirectional(helloProperty);
-
+        helloProperty.bind(helloLabel.textProperty());
         helloBtn.setOnAction(this::hello);
 
+
+
         showView2Btn.setOnAction(e -> {
-            helloProperty.setValue("showView2 clicked: " + ++clickCount);
-            //fxView2.addToTabPane(rootTabPane);
+            thisView = Views.forController(this);
+            helloLabel.setText("showView2 clicked: " + ++clickCount);
+            if(fxView2 == null){
+                fxView2 = Views.create(FXController2.class);
+                fxView2.getController().setFxView1(thisView);
+            }
+            //fxView2.show(thisView.getStage());
+            //thisView.close();
+            fxView2.show();
         });
     }
 
-    @PostInjections
-    private void init() {
-        System.out.println("thisView: " + thisView + " fxView2: " + fxView2);
-        showView2Btn.disableProperty().bindBidirectional(fxView2.getIsShown());
-    }
-
     public void hello(ActionEvent event) {
-        helloProperty.setValue("hello() called");
-        //fxmlView.showInNewStage();
+        helloLabel.setText("hello() called");
+        if(helloView == null){
+            helloView = Views.create(FxmlController.class);
+        }
+        helloView.show();
     }
 
     public void hello(String v) {
         System.out.println("hello(String)" + v);
+    }
+
+    public void setFxView2(View fxView2) {
+        this.fxView2 = fxView2;
     }
 }

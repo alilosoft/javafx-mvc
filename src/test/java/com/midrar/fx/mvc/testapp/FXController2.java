@@ -2,37 +2,49 @@ package com.midrar.fx.mvc.testapp;
 
 
 import com.midrar.fx.mvc.controller.FXController;
-import com.midrar.fx.mvc.view.CSS;
-import com.midrar.fx.mvc.view.Decoration;
-import com.midrar.fx.mvc.view.I18n;
+import com.midrar.fx.mvc.view.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 
 @FXController(fxml = "fxml/view2.fxml", isDefinedInFxml = false)
 @CSS("css/view2-style.css")
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")
-@Decoration(title = "View 2 Example", icons = {"icons/Shopping Cart_16px.png", "icons/Shopping Cart_24px.png"})
+@Decoration(title = "FXView 2 Example", icons = {"icons/Shopping Cart_16px.png", "icons/Shopping Cart_24px.png"})
+@Stage(resizable = false)
 public class FXController2 {
     @FXML
-    private Pane stackPane;
+    private Pane root;
+
+    //@FXView(FXController1.class)
+    private View fxView1;
+
+    //@FXView(FxmlController.class)
+    private View helloView;
 
     @FXML
-    public TabPane tabPane;
-
-    @FXML
-    //@ShowView(controllerClass = FXController1.class)
-    private Button showViewBtn;
+    private Button showView1Btn;
 
     @FXML
     private  Button helloBtn;
 
-    public Pane getStackPane() {
-        return stackPane;
+    public Pane getRoot() {
+        return root;
     }
 
     public void initialize(){
-        System.out.println("initializing..."+ this);
+        System.out.println("initializing...." + this);
+        System.out.println("fxView1: " + fxView1);
+        //helloBtn.setOnAction(e -> helloView.show());
+        showView1Btn.setOnAction(e-> {
+            if(fxView1 == null){
+                fxView1 = Views.create(FXController1.class);
+            }
+            fxView1.show();
+        });
+    }
+
+    public void setFxView1(View fxView1) {
+        this.fxView1 = fxView1;
     }
 }

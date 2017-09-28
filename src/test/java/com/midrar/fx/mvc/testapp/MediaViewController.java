@@ -17,7 +17,7 @@ public class MediaViewController {
     private MediaView mediaView;
     @FXML
     private void initialize(){
-        // create media player
+        // setStartView media player
         Media media = new Media(MEDIA_URL);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
 

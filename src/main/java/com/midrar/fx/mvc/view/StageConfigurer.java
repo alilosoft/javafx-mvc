@@ -7,58 +7,42 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 
 public class StageConfigurer {
-    private StageStyle style;
-    private Modality modality;
-
-    private String title;
-    private List<Image> icons;
-
+    private Optional<StageStyle> style = Optional.empty();
+    private Optional<Modality> modality = Optional.empty();
 
     private boolean iconified;
     private boolean fullScreen;
-    private String fullScreenExitHint;
+    private Optional<String> fullScreenExitHint = Optional.empty();
 
     private boolean alwaysOnTop;
     private boolean maximized;
     private boolean resizable = true;
 
     public Stage configure(Stage stage){
-        if(style != null) stage.initStyle(style);
-        if(modality != null) stage.initModality(modality);
-        if(title != null) stage.setTitle(title);
-        if(icons != null) stage.getIcons().addAll(icons);
+        style.ifPresent(stage::initStyle);
+        modality.ifPresent(stage::initModality);
         stage.setAlwaysOnTop(alwaysOnTop);
         stage.setResizable(resizable);
         stage.setIconified(iconified);
         stage.setMaximized(maximized);
         stage.setFullScreen(fullScreen);
-        if(fullScreenExitHint != null && !fullScreenExitHint.isEmpty()) {
-            stage.setFullScreenExitHint(fullScreenExitHint);
-        }
+        fullScreenExitHint.filter(s -> !s.isEmpty()).ifPresent(stage::setFullScreenExitHint);
         return stage;
     }
 
     public StageConfigurer style(StageStyle style){
-        this.style = style;
+        this.style = Optional.of(style);
         return this;
     }
 
     public StageConfigurer modality(Modality modality){
-        this.modality = modality;
-        return this;
-    }
-
-    public StageConfigurer title(String title){
-        this.title = title;
-        return this;
-    }
-
-    public StageConfigurer icons(List<Image> icons){
-        this.icons = icons;
+        this.modality = Optional.of(modality);
         return this;
     }
 
@@ -88,7 +72,7 @@ public class StageConfigurer {
     }
 
     public StageConfigurer fullScreenExitHint(String fullScreenExitHint){
-        this.fullScreenExitHint = fullScreenExitHint;
+        this.fullScreenExitHint = Optional.of(fullScreenExitHint);
         return this;
     }
 }

@@ -1,28 +1,32 @@
 package com.midrar.fx.mvc.testapp;
 
-import com.midrar.fx.mvc.controller.ControllerManager;
 import com.midrar.fx.mvc.view.StageConfigurer;
-import com.midrar.fx.mvc.view.ViewLoader;
+import com.midrar.fx.mvc.view.View;
+import com.midrar.fx.mvc.view.Views;
 import javafx.application.Application;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.util.Locale;
 
 public class TestApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         Locale.setDefault(Locale.forLanguageTag("ar"));
-
-        ControllerManager controllerManager = new ControllerManager();
+        //ControllerManagerImpl controllerManager = ControllerManagerImpl.getInstance();
         //controllerManager.setEnableCaching(false);
-        ViewLoader viewLoader = new ViewLoader(controllerManager);
+        //controllerManager.setControllerFactory(ControllerFactory.reflectionFactory());
+        //StageConfigurer stageConfigurer = new StageConfigurer().resizable(false);
+        //Views.create(FXController1.class).show(primaryStage);
+        long s = System.currentTimeMillis();
+        //for(int i = 0; i < 50; i++)
+        View v = Views.create(FXController1.class);
+        v.show();
+        System.out.println("takes: "+ (System.currentTimeMillis()-s));
 
-        StageConfigurer stageConfigurer = new StageConfigurer()
-                .resizable(false);
+        //fxView1.show(primaryStage);
+        //fxView1.show(new Stage());
+        //viewFactory.createView(FXController2.class).show();
+        //viewFactory.createView(null).show();
+        //Views.createView(FXController1.class);
 
-        //viewLoader.loadView(FXController1.class).showInNewStage(stageConfigurer);
-        viewLoader.loadView(FxmlController.class).showInNewStage();
-        //viewLoader.loadView(FXController2.class).showInNewStage();
     }
 }
