@@ -26,12 +26,6 @@
  */
 package com.midrar.fx.mvc.view;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
-import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableBooleanValue;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -50,18 +44,27 @@ import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 /**
  */
 @Data
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
 @ToString(of = "controller")
-public class View<T> {
+public abstract class View<T> {
     private T controller;
-    private Parent rootNode;
+    @NonNull private Parent rootNode;
     private String title = "";
     private List<Image> icons = Collections.EMPTY_LIST;
     private List<String> cssUrls = Collections.EMPTY_LIST;
     private Optional<StageConfigurer> stageConfigurer = Optional.empty();
     private Optional<Stage> stage = Optional.empty();
     private ViewContext viewContext;
+
+    public View(T controller) {
+        assertParameterNotNull(controller, "controller");
+        this.controller = controller;
+        rootNode = ViewLoader.loadRoot(controller);
+        title = ViewLoader.loadTitle(controller.getClass());
+        icons = ViewLoader.loadIcons(controller.getClass());
+        cssUrls = ViewLoader.loadCssUrls(controller.getClass());
+    }
 
     void setViewContext(ViewContext viewContext) {
         this.viewContext = viewContext;
@@ -106,13 +109,15 @@ public class View<T> {
      * >Note: if a stage configuration is provided using the @{@link com.midrar.fx.mvc.view.Stage}
      * annotation then it will be applied for the stage used to show this {@link View} .
      */
-    public void show() {
-        if(!stage.isPresent()){
-            stage = Optional.of(new Stage());
-            stageConfigurer.ifPresent(sc -> sc.configure(stage.get()));
-        }
-        showInStage(stage.get());
-    }
+//    public void show() {
+//        if(!stage.isPresent()){
+//            stage = Optional.of(new Stage());
+//            stageConfigurer.ifPresent(sc -> sc.configure(stage.get()));
+//        }
+//        showInStage(stage.get());
+//    }
+
+    abstract public void show();
 
     public void addToPane(Pane pane) {
         assertParameterNotNull(pane, "pane");
