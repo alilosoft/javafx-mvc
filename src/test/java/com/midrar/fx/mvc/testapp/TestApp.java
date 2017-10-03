@@ -18,8 +18,10 @@ public class TestApp extends Application {
         //Views.create(FXController1.class).show(primaryStage);
         long s = System.currentTimeMillis();
         //for(int i = 0; i < 50; i++)
-        View v = Views.create(FXController1.class);
+        View v = Views.create(FXController1.class, primaryStage);
         v.show();
+        View v2 = Views.create(FXController2.class, primaryStage);
+        //v2.show();
         System.out.println("takes: "+ (System.currentTimeMillis()-s));
 
         //fxView1.show(primaryStage);

@@ -53,17 +53,15 @@ public abstract class View<T> {
     private String title = "";
     private List<Image> icons = Collections.EMPTY_LIST;
     private List<String> cssUrls = Collections.EMPTY_LIST;
-    private Optional<StageConfigurer> stageConfigurer = Optional.empty();
-    private Optional<Stage> stage = Optional.empty();
     private ViewContext viewContext;
 
     public View(T controller) {
         assertParameterNotNull(controller, "controller");
         this.controller = controller;
         rootNode = ViewLoader.loadRoot(controller);
-        title = ViewLoader.loadTitle(controller.getClass());
-        icons = ViewLoader.loadIcons(controller.getClass());
-        cssUrls = ViewLoader.loadCssUrls(controller.getClass());
+        title = ViewLoader.loadTitle(controller);
+        icons = ViewLoader.loadIcons(controller);
+        cssUrls = ViewLoader.loadCssUrls(controller);
     }
 
     void setViewContext(ViewContext viewContext) {
@@ -88,7 +86,7 @@ public abstract class View<T> {
                 throw new RuntimeException("The "+this+" is already shown in another Stage!");
             }
         }
-        this.stage = Optional.of(stage);
+
         Scene scene = rootNode.getScene();
         if (scene == null) {
             scene = new Scene(rootNode);
@@ -104,20 +102,9 @@ public abstract class View<T> {
         stage.show();
     }
 
-    /**
-     * Show this {@link View} in its own {@link Stage}.
-     * >Note: if a stage configuration is provided using the @{@link com.midrar.fx.mvc.view.Stage}
-     * annotation then it will be applied for the stage used to show this {@link View} .
-     */
-//    public void show() {
-//        if(!stage.isPresent()){
-//            stage = Optional.of(new Stage());
-//            stageConfigurer.ifPresent(sc -> sc.configure(stage.get()));
-//        }
-//        showInStage(stage.get());
-//    }
-
     abstract public void show();
+    abstract public void close();
+    abstract public boolean isShowing();
 
     public void addToPane(Pane pane) {
         assertParameterNotNull(pane, "pane");
@@ -139,20 +126,4 @@ public abstract class View<T> {
         tabPane.getTabs().add(tab);
     }
 
-    private boolean isShowing(){
-        return rootNode.getScene() != null &&
-                rootNode.getScene().getWindow() != null &&
-                rootNode.getScene().getWindow().isShowing();
-    }
-
-    public void close() {
-        /**
-         * if this value is shown in a stage then close the stage;
-         * if it is shown in a TabPane then remove the tab of this value
-         * if it is shown in a Pane then-> multiple scenarios ->
-         *  1- if the pane is a rootNode of a value (i.e: shown in tab or stage) then simply close the value that value;
-         *  2- if the pane is part of a layout then try to remove with an appropriate animation effect.
-         */
-        stage.ifPresent(s -> s.close());
-    }
 }

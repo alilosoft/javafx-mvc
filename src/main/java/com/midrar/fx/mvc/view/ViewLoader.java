@@ -61,7 +61,7 @@ class ViewLoader {
 
     /**
      * Parse the fxml file url from the @{@link FXController} annotation.
-     * @param controllerClass: a class annotated with @{@link FXController}
+     * @param controllerClass:
      * @return fxml file url.
      */
     private static URL loadFxmlFileUrl(Class<?> controllerClass) {
@@ -78,7 +78,7 @@ class ViewLoader {
     /**
      * Get the resource bundle base name if exist, from the @{@link I18n} annotation
      * and return a resource bundle using the default local.
-     * @param controllerClass a class annotated with @{@link FXController}
+     * @param controllerClass:
      * @return Optional<ResourceBundle>
      */
     private static Optional<ResourceBundle> loadResourceBundle(Class<?> controllerClass) {
@@ -96,10 +96,11 @@ class ViewLoader {
 
     /**
      * Get the title defined by @{@link Decoration} annotation.
-     * @param controllerClass: a class annotated with @{@link FXController}
+     * @param controller:
      * @return the title defined by @{@link Decoration} if any
      */
-    static String loadTitle(Class<?> controllerClass) {
+    static String loadTitle(Object controller) {
+        Class<?> controllerClass = controller.getClass();
         Decoration decorationAnnotation = controllerClass.getAnnotation(Decoration.class);
         if (decorationAnnotation == null) {
             return "";
@@ -110,10 +111,11 @@ class ViewLoader {
     /**
      * Get the icons defined by @{@link Decoration} annotation.
      *
-     * @param controllerClass: a class annotated with @{@link FXController}
+     * @param controller:
      * @return list of icons defined by @{@link Decoration} or {@link Collections.EmptyList} if non.
      */
-    static List<Image> loadIcons(Class<?> controllerClass) {
+    static List<Image> loadIcons(Object controller) {
+        Class<?> controllerClass = controller.getClass();
         Decoration decorationAnnotation = controllerClass.getAnnotation(Decoration.class);
         if (decorationAnnotation == null) {
             return Collections.EMPTY_LIST;
@@ -133,9 +135,10 @@ class ViewLoader {
 
     /**
      * Get CSS files URLs defined by @{@link CSS} annotation.
-     * @param controllerClass: a class annotated with @{@link FXController}
+     * @param controller:
      */
-    static List<String> loadCssUrls(Class<?> controllerClass) {
+    static List<String> loadCssUrls(Object controller) {
+        Class<?> controllerClass = controller.getClass();
         CSS cssAnnotation = controllerClass.getAnnotation(CSS.class);
         if (cssAnnotation == null) {
             return Collections.EMPTY_LIST;
@@ -154,10 +157,11 @@ class ViewLoader {
 
     /**
      * Create a {@link StageConfigurer} object using options defined by @{@link Stage} annotation.
-     * @param controllerClass: a class annotated with @{@link FXController}
+     * @param controller:
      * @return StageConfigurer object.
      */
-    static Optional<StageConfigurer> loadStageConfigurer(Class<?> controllerClass) {
+    static Optional<StageConfigurer> loadStageConfigurer(Object controller) {
+        Class<?> controllerClass = controller.getClass();
         Stage stageAnnotation = controllerClass.getAnnotation(Stage.class);
         if (stageAnnotation == null) {
             return Optional.empty();

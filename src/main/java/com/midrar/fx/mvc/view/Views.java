@@ -1,6 +1,7 @@
 package com.midrar.fx.mvc.view;
 
 import com.midrar.fx.mvc.controller.*;
+import javafx.stage.Stage;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,8 +29,12 @@ public class Views {
      * @return
      */
     public static <T> View<T> create(Class<T> controllerClass) {
+        return create(controllerClass, new Stage());
+    }
+
+    public static <T> View<T> create(Class<T> controllerClass, Stage stage) {
         T controller = controllerFactory.create(controllerClass);
-        View newView = new StageView(controller);
+        View newView = new StageView(controller, stage);
         viewByControllerCache.putIfAbsent(newView.getController().hashCode(), newView);
         return newView;
     }

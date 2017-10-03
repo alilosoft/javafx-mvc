@@ -57,8 +57,6 @@ public class FXController1 {
         helloProperty.bind(helloLabel.textProperty());
         helloBtn.setOnAction(this::hello);
 
-
-
         showView2Btn.setOnAction(e -> {
             thisView = Views.forController(this);
             helloLabel.setText("showView2 clicked: " + ++clickCount);
