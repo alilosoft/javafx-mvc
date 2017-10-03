@@ -25,11 +25,12 @@ public class Views {
     }
 
     /**
+     * Create a {@link ParentView} object
      * @param controllerClass: a class annotated with @{@link FXController}
      * @return
      */
     public static <T> View<T> create(Class<T> controllerClass) {
-        return create(controllerClass, new Stage());
+        return create(controllerClass, null);
     }
 
     public static <T> View<T> create(Class<T> controllerClass, Stage stage) {
@@ -44,7 +45,7 @@ public class Views {
         assertParameterNotNull(controllerClass, "controllerClass");
         assertParameterNotNull(viewContext, "viewContext");
         View view = create(controllerClass);
-        view.setViewContext(viewContext);
+        //view.setViewContext(viewContext);
         return view;
     }
 
@@ -62,7 +63,7 @@ public class Views {
     }
 
     /**
-     * Despite how many times this method is called, it returns always the same {@link View} instance,
+     * Despite how many times this method is called, it returns always the same {@link ParentView} instance,
      * the first one created for the given controllerClass parameter.
      * @param controllerClass: a class annotated with @{@link FXController}
      * @param <T>

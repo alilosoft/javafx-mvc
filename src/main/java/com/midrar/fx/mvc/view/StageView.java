@@ -6,30 +6,26 @@ import javafx.stage.Stage;
 
 import java.util.Locale;
 
-import static com.midrar.fx.mvc.utils.Asserts.*;
-
-class StageView<T> extends View<T>{
+class StageView<T> extends ParentView<T> implements View<T>{
     private Stage stage;
-    Scene scene;
+    private Scene scene;
 
-    public StageView(T controller) {
-        this(controller ,new Stage());
-    }
-
-    StageView(T controller, Stage stage) {
+    StageView(T controller, Stage _stage) {
         super(controller);
-        assertParameterNotNull(stage, "stage");
-        this.stage = stage;
+        if(_stage == null){
+            stage = new Stage();
+            annotationsParser.stageConfigurer().ifPresent(this::setStageConfigurer);
+        }else {
+            stage = _stage;
+        }
         scene = new Scene(getRootNode());
         scene.getStylesheets().addAll(getCssUrls());
         if (Locale.getDefault().equals(new Locale("ar"))) {
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         }
-        //stage.setScene(scene);
         stage.setTitle(getTitle());
         stage.getIcons().clear();
         stage.getIcons().addAll(getIcons());
-        ViewLoader.loadStageConfigurer(controller.getClass()).ifPresent(this::setStageConfigurer);
     }
 
     void setStageConfigurer(StageConfigurer stageConfigurer) {
@@ -37,9 +33,9 @@ class StageView<T> extends View<T>{
     }
 
     /**
-     * Show this {@link View} in its own {@link Stage}.
+     * Show this {@link ParentView} in its own {@link Stage}.
      * >Note: if a stage configuration is provided using the @{@link com.midrar.fx.mvc.view.Stage}
-     * annotation then it will be applied for the stage used to show this {@link View} .
+     * annotation then it will be applied for the stage used to show this {@link ParentView} .
      */
     @Override
     public void show(){
