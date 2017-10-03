@@ -19,44 +19,11 @@ import java.util.stream.Collectors;
 import static com.midrar.fx.mvc.utils.Asserts.assertAnnotation;
 import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 
-class ViewLoader {
+class AnnotationsParser {
     private Object controller;
 
-    ViewLoader(Object controller) {
+    AnnotationsParser(Object controller) {
         this.controller = controller;
-    }
-
-    /**
-     * Load the root node hierarchy of the {@link View} controlled by the given controller object.
-     * @param controller
-     * @return a {@link Parent} node.
-     */
-    static Parent loadRoot(Object controller) {
-        assertParameterNotNull(controller, "controller");
-        Class controllerClass = controller.getClass();
-        FXController fxController = assertAnnotation(controllerClass, FXController.class);
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        if (fxController.isDefinedInFxml()) {
-            // if the controller class is defined in the .fxml file using 'fx:controller'
-            // then make sure that the controller factory used by fxmlLoader will return
-            // the same controller instance of the View  being initialized.
-            fxmlLoader.setControllerFactory(c -> controller);
-        } else {
-            // if the controller class is not defined in the .fxml file then pass the controller instance
-            // of the View being initialized to fxmlLoader.
-            fxmlLoader.setController(controller);
-        }
-        // parse the .fxml file url defined by @FXController
-        URL fxmlUrl = loadFxmlFileUrl(controllerClass);
-        fxmlLoader.setLocation(fxmlUrl);
-        // parse and set the resource bundle if defined by @FXController
-        Optional<ResourceBundle> bundle = loadResourceBundle(controllerClass);
-        bundle.ifPresent(fxmlLoader::setResources);
-        try {
-            return fxmlLoader.load();
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load node hierarchy from: " + fxmlUrl, e);
-        }
     }
 
     /**
