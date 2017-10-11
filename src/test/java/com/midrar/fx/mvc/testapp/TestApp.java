@@ -1,6 +1,6 @@
 package com.midrar.fx.mvc.testapp;
 
-import com.midrar.fx.mvc.view.StageConfigurer;
+import com.midrar.fx.mvc.view.StageView;
 import com.midrar.fx.mvc.view.View;
 import com.midrar.fx.mvc.view.Views;
 import javafx.application.Application;
@@ -18,10 +18,12 @@ public class TestApp extends Application {
         //Views.create(FXController1.class).show(primaryStage);
         long s = System.currentTimeMillis();
         //for(int i = 0; i < 50; i++)
-        View v = Views.create(FXController1.class, primaryStage);
-        v.show();
-        View v2 = Views.create(FXController2.class, primaryStage);
-        //v2.show();
+        StageView<FXController1> fxView1 = Views.create(FXController1.class);
+        View<FXController2> fxView2 = Views.create(FXController2.class);
+        fxView1.getController().setFxView2(fxView2);
+        fxView2.getController().setFxView1(fxView1);
+        fxView1.show();
+        fxView2.show();
         System.out.println("takes: "+ (System.currentTimeMillis()-s));
 
         //fxView1.show(primaryStage);

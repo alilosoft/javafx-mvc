@@ -42,10 +42,10 @@ public @interface FXController {
      * Defines the .fxml file that defines the {@link javafx.scene.Node} hierarchy of the {@link com.midrar.fx.mvc.view.View}
      * associated with the controller class annotated with this annotation.
      */
-    String fxmlFile() default "";
+    String view() default "";
 
     /**
-     *Set this flag to false to inform the View that the controller is not defined in the .fxmlFile file.
+     *Set this flag to false to inform the View that the controller is not defined in the .view file.
      */
     boolean isControllerInFxml() default true;
 

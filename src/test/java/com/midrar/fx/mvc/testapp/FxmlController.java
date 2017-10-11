@@ -6,10 +6,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.stage.StageStyle;
 
-@FXController(fxml = "fxml/test.fxml")
+@FXController(view = "view/test.fxml")
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")// TODO: done
 @CSS({"css/test-style.css", "css/test-style.css"})// TODO: done
-@Decoration(title = "fxml fx:controller", icons = {"icons/money48.png", "icons/money24.png", "icons/money16.png"})
+@Decoration(title = "view fx:controller", icons = {"icons/money48.png", "icons/money24.png", "icons/money16.png"})
 @Stage(style = StageStyle.UNIFIED)
 public class FxmlController {
 

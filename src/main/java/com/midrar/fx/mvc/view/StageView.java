@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 
 import java.util.Locale;
 
-class StageView<T> extends ParentView<T> implements View<T>{
+public class StageView<T> extends ParentView<T>{
     private Stage stage;
     private Scene scene;
 

@@ -7,7 +7,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 
-@FXController(fxml = "com/midrar/fx/mvc/testapp/fxml/MediaView.fxml")
+@FXController(view = "com/midrar/fx/mvc/testapp/fxml/MediaView.fxml")
 public class MediaViewController {
     private static final String MEDIA_URL =  MediaViewController.class.getResource("/aicha.mp4").toExternalForm();
     @FXML

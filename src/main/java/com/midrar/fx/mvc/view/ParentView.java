@@ -44,7 +44,7 @@ import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
  */
 @Data
 @Setter(AccessLevel.NONE)
-class ParentView<T> {
+abstract class ParentView<T> implements View<T>{
     private T controller;
     @NonNull private Parent rootNode;
     private String title = "";
@@ -53,9 +53,9 @@ class ParentView<T> {
     private ViewContext viewContext;
     protected AnnotationsParser annotationsParser;
 
-    ParentView(T controller) {
-        assertParameterNotNull(controller, "controller");
-        this.controller = controller;
+    ParentView(T _controller) {
+        assertParameterNotNull(_controller, "controller");
+        controller = _controller;
         annotationsParser = new AnnotationsParser(controller.getClass());
         rootNode = loadRoot(controller);
         title = annotationsParser.title();
@@ -71,16 +71,16 @@ class ParentView<T> {
     private Parent loadRoot(Object controller) {
         FXMLLoader fxmlLoader = new FXMLLoader();
         if (annotationsParser.isControllerInFxml()) {
-            // if the controller class is defined in the .fxmlFile file using 'fx:controller'
+            // if the controller class is defined in the .view file using 'fx:controller'
             // then make sure that the controller factory used by fxmlLoader will return
             // the same controller instance of the ParentView  being initialized.
             fxmlLoader.setControllerFactory(c -> controller);
         } else {
-            // if the controller class is not defined in the .fxmlFile file then pass the controller instance
+            // if the controller class is not defined in the .view file then pass the controller instance
             // of the ParentView being initialized to fxmlLoader.
             fxmlLoader.setController(controller);
         }
-        // parse the .fxmlFile file url defined by @FXController
+        // parse the .view file url defined by @FXController
         URL fxmlUrl = annotationsParser.fxmlFileUrl();
         fxmlLoader.setLocation(fxmlUrl);
         // parse and set the resource bundle if defined by @FXController
@@ -93,9 +93,9 @@ class ParentView<T> {
         }
     }
 
-    void setViewContext(ViewContext viewContext) {
-        this.viewContext = viewContext;
-        this.viewContext.registerView(this);
+    void setViewContext(ViewContext _viewContext) {
+        viewContext = _viewContext;
+        viewContext.registerView(controller.getClass(),this);
     }
 
     //TODO: move to concrete class PaneView that extends view
