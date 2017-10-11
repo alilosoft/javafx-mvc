@@ -25,8 +25,12 @@ public class StageConfigurer {
     private boolean resizable = true;
 
     public Stage configure(Stage stage){
-        style.ifPresent(stage::initStyle);
-        modality.ifPresent(stage::initModality);
+        try {
+            style.ifPresent(stage::initStyle);
+            modality.ifPresent(stage::initModality);
+        }catch (Exception e){
+            //Just ignore, because if the stage has been visible we can't set Style and Modality
+        }
         stage.setAlwaysOnTop(alwaysOnTop);
         stage.setResizable(resizable);
         stage.setIconified(iconified);

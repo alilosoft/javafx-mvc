@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark a method to run after a {@link com.midrar.fx.mvc.view.View} is loaded and
+ * Mark a method to run after a {@link ParentView} is loaded and
  * all injections are done to its @{@link FXController}.
  */
 @Retention(RetentionPolicy.RUNTIME)

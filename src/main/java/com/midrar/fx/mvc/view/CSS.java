@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Defines a CSS files to add to {@link javafx.scene.Scene} or {@link javafx.scene.control.TabPane}
- * when showing this {@link View}.
+ * when showing this {@link ParentView}.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

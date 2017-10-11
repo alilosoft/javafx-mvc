@@ -1,8 +1,6 @@
 package com.midrar.fx.mvc.controller;
 
-import com.midrar.fx.mvc.controller.FXController;
 import com.midrar.fx.mvc.view.View;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

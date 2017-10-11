@@ -13,7 +13,7 @@ import javafx.scene.control.TabPane;
 import java.util.ResourceBundle;
 
 
-@FXController(fxml = "fxml/view1.fxml")
+@FXController(view = "fxml/view1.fxml")
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")
 @Decoration(title = "FXView 1 Example", icons = {"icons/Home_16px.png", "icons/Home_24px.png"})
 @CSS("css/view1-style.css")
@@ -57,17 +57,15 @@ public class FXController1 {
         helloProperty.bind(helloLabel.textProperty());
         helloBtn.setOnAction(this::hello);
 
-
-
         showView2Btn.setOnAction(e -> {
-            thisView = Views.forController(this);
             helloLabel.setText("showView2 clicked: " + ++clickCount);
             if(fxView2 == null){
+                System.out.println("creating new view for: "+FXController2.class);
                 fxView2 = Views.create(FXController2.class);
                 fxView2.getController().setFxView1(thisView);
             }
-            //fxView2.show(thisView.getStage());
-            //thisView.close();
+            thisView = Views.forController(this);
+            thisView.close();
             fxView2.show();
         });
     }

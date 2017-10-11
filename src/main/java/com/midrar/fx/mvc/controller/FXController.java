@@ -26,8 +26,6 @@
  */
 package com.midrar.fx.mvc.controller;
 
-import com.midrar.fx.mvc.view.View;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,19 +39,15 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface FXController {
     /**
-     * Defines the .fxml file that defines the {@link javafx.scene.Node} hierarchy of the {@link View}
-     * to be controlled by the annotated controller class.
+     * Defines the .fxml file that defines the {@link javafx.scene.Node} hierarchy of the {@link com.midrar.fx.mvc.view.View}
+     * associated with the controller class annotated with this annotation.
      */
-    String fxml() default "";
+    String view() default "";
 
     /**
-     *Set this flag to false to inform the ViewManager that the controller is not defined in the .fxml file.
-     * In that case the ViewManager will delegate the controller instantiation to the provided {@link ControllerManagerImpl},
-     * and passes the created instance to te {@link javafx.fxml.FXMLLoader} implicitly.
-     *>Note: that if this flag is not set to false, and no controller is defined in .fxml file then the loaded view won't have
-     * any controller.
+     *Set this flag to false to inform the View that the controller is not defined in the .view file.
      */
-    boolean isDefinedInFxml() default true;
+    boolean isControllerInFxml() default true;
 
 }
 

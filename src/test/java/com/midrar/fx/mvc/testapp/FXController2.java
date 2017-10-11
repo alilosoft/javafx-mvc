@@ -7,7 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 
-@FXController(fxml = "fxml/view2.fxml", isDefinedInFxml = false)
+@FXController(view = "fxml/view2.fxml", isControllerInFxml = false)
 @CSS("css/view2-style.css")
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")
 @Decoration(title = "FXView 2 Example", icons = {"icons/Shopping Cart_16px.png", "icons/Shopping Cart_24px.png"})
@@ -38,6 +38,7 @@ public class FXController2 {
         //helloBtn.setOnAction(e -> helloView.show());
         showView1Btn.setOnAction(e-> {
             if(fxView1 == null){
+                System.out.println("creating new view for: "+FXController1.class);
                 fxView1 = Views.create(FXController1.class);
             }
             fxView1.show();
