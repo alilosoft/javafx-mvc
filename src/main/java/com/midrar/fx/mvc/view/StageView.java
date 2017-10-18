@@ -2,6 +2,7 @@ package com.midrar.fx.mvc.view;
 
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.Locale;
@@ -19,6 +20,7 @@ public class StageView<T> extends ParentView<T>{
             stage = _stage;
         }
         scene = new Scene(getRootNode());
+        scene.setFill(Color.TRANSPARENT);
         scene.getStylesheets().addAll(getCssUrls());
         if (Locale.getDefault().equals(new Locale("ar"))) {
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
