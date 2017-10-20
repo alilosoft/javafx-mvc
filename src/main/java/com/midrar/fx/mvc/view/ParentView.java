@@ -124,4 +124,22 @@ abstract class ParentView<T> implements View<T>{
         tabPane.getTabs().add(tab);
     }
 
+    protected Optional<EventHandler<Event>> onShownHandler = Optional.empty();
+    @Override
+    public void onShown(EventHandler<Event> handler) {
+        onShownHandler = Optional.of(handler);
+    }
+
+    protected Optional<EventHandler<Event>> onHiddenHandler = Optional.empty();
+    @Override
+    public void onHidden(EventHandler<Event> handler) {
+        onHiddenHandler = Optional.of(handler);
+    }
+
+    protected Optional<EventHandler<Event>> onHideRequestHandler = Optional.empty();
+    @Override
+    public void onHideRequest(EventHandler<Event> handler) {
+        onHideRequestHandler = Optional.of(handler);
+    }
+
 }
