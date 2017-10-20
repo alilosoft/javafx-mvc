@@ -14,3 +14,8 @@
 - Create a StageView using Views.create(Controller.class) or Views.create(Controller.class, Stage)
 - StageView implements show() method to show in a Stage 
 
+# v0.1-beta3
+- Moving ControllerFactory from Views to new Controllers class.
+- Adding support for localised view title, that can be defined in resource bundle of view 
+- Adding support for show, hide and hide request listeners for the View
+
