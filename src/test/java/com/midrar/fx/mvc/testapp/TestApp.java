@@ -3,11 +3,8 @@ package com.midrar.fx.mvc.testapp;
 import com.midrar.fx.mvc.view.StageView;
 import com.midrar.fx.mvc.view.View;
 import com.midrar.fx.mvc.view.Views;
-import com.sun.org.apache.xpath.internal.SourceTree;
 import javafx.application.Application;
 import javafx.stage.Stage;
-
-import java.util.Locale;
 
 public class TestApp extends Application {
 
@@ -26,9 +23,13 @@ public class TestApp extends Application {
         fxView1.getController().setFxView2(fxView2);
         fxView2.getController().setFxView1(fxView1);
 
-        fxView1.setOnShow(System.out::println);
+        fxView1.onShown(System.out::println);
         fxView1.show();
-        fxView1.setOnHide(e ->  System.out.println(e));
+        fxView1.onHidden(e ->  System.out.println(e));
+        fxView1.onHideRequest(e ->  {
+            System.out.println(e);
+            e.consume();
+        });
         //fxView2.show();
         System.out.println("takes: "+ (System.currentTimeMillis()-s));
 

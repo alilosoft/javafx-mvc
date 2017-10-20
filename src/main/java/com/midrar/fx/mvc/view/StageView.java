@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.Setter;
 
 import java.util.Locale;
+import java.util.Optional;
 
 @Data
 @Setter(AccessLevel.NONE)
@@ -26,10 +27,6 @@ public class StageView<T> extends ParentView<T> {
         } else {
             stage = _stage;
         }
-        stage.setOnShown(e -> showEventHandler.ifPresent(h -> h.handle(e)));
-        stage.setOnHidden(e -> hideEventHandler.ifPresent(h -> h.handle(e)));
-        stage.setOnCloseRequest(e -> hideRequestEventHandler.ifPresent(h -> h.handle(e)));
-
         scene = new Scene(getRootNode());
         scene.setFill(Color.TRANSPARENT);
         scene.getStylesheets().addAll(getCssUrls());
@@ -66,6 +63,21 @@ public class StageView<T> extends ParentView<T> {
 
     public void hide() {
         stage.close();
+    }
+
+    @Override
+    public void onShown(EventHandler<Event> handler) {
+        stage.setOnShown(handler::handle);
+    }
+
+    @Override
+    public void onHidden(EventHandler<Event> handler) {
+        stage.setOnHidden(handler::handle);
+    }
+
+    @Override
+    public void onHideRequest(EventHandler<Event> handler) {
+        stage.setOnCloseRequest(handler::handle);
     }
 
 }

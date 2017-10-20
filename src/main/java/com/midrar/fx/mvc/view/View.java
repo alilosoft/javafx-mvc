@@ -8,7 +8,7 @@ public interface View<T> {
     void show();
     void hide();
     boolean isShowing();
-    void setOnShow(EventHandler<Event> handler);
-    void setOnHide(EventHandler<Event> handler);
-    void setOnHideRequest(EventHandler<Event> handler);
+    void onShown(EventHandler<Event> handler);
+    void onHidden(EventHandler<Event> handler);
+    void onHideRequest(EventHandler<Event> handler);
 }
