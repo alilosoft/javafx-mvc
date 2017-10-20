@@ -9,13 +9,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
+import javafx.stage.StageStyle;
 
 import java.util.ResourceBundle;
 
 
 @FXController(view = "fxml/view1.fxml")
 @I18n("com.midrar.fx.mvc.testapp.i18n.bundle")
-@Decoration(title = "FXView 1 Example", icons = {"icons/Home_16px.png", "icons/Home_24px.png"})
+@Decoration(icons = {"icons/Home_16px.png", "icons/Home_24px.png"})
 @CSS("css/view1-style.css")
 @Stage(resizable = true)
 public class FXController1 {
@@ -48,7 +49,7 @@ public class FXController1 {
     private int clickCount = 0;
 
     public void initialize() {
-        //System.out.println("initializing...." + this);
+        System.out.println("initializing...." + this);
         //System.out.println("fxView2: " + fxView2);
         //System.out.println("thisView: "+ thisView);
 
@@ -65,7 +66,7 @@ public class FXController1 {
                 fxView2.getController().setFxView1(thisView);
             }
             thisView = Views.forController(this);
-            thisView.close();
+            thisView.hide();
             fxView2.show();
         });
     }

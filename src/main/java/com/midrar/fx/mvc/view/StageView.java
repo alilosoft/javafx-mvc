@@ -1,24 +1,37 @@
 package com.midrar.fx.mvc.view;
 
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Setter;
 
 import java.util.Locale;
 
-public class StageView<T> extends ParentView<T>{
+@Data
+@Setter(AccessLevel.NONE)
+public class StageView<T> extends ParentView<T> {
     private Stage stage;
     private Scene scene;
 
-    StageView(T controller, Stage _stage) {
-        super(controller);
-        if(_stage == null){
+    StageView(Class<T> controllerClass, Stage _stage) {
+        super(controllerClass);
+        if (_stage == null) {
             stage = new Stage();
             annotationsParser.stageConfigurer().ifPresent(this::setStageConfigurer);
-        }else {
+        } else {
             stage = _stage;
         }
+        stage.setOnShown(e -> showEventHandler.ifPresent(h -> h.handle(e)));
+        stage.setOnHidden(e -> hideEventHandler.ifPresent(h -> h.handle(e)));
+        stage.setOnCloseRequest(e -> hideRequestEventHandler.ifPresent(h -> h.handle(e)));
+
         scene = new Scene(getRootNode());
+        scene.setFill(Color.TRANSPARENT);
         scene.getStylesheets().addAll(getCssUrls());
         if (Locale.getDefault().equals(new Locale("ar"))) {
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
@@ -38,20 +51,20 @@ public class StageView<T> extends ParentView<T>{
      * annotation then it will be applied for the stage used to show this {@link ParentView} .
      */
     @Override
-    public void show(){
+    public void show() {
         stage.setScene(scene);
         stage.show();
         stage.toFront();
     }
 
     @Override
-    public boolean isShowing(){
+    public boolean isShowing() {
         return getRootNode().getScene() != null &&
                 getRootNode().getScene().getWindow() != null &&
                 getRootNode().getScene().getWindow().isShowing();
     }
 
-    public void close(){
+    public void hide() {
         stage.close();
     }
 

@@ -14,22 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 
 public class Views {
-    
-    private static ConcurrentHashMap<Integer, View> viewsCache = new ConcurrentHashMap<>();
-    private static ControllerFactory controllerFactory = ControllerFactory.reflectionFactory();
-
     private Views() {
         //Hide the default constructor!!!
-    }
+    } // hide default constructor
 
-    /**
-     * If you want to use a custom controller factory other then the default implementation
-     * -witch uses reflection- then use this method to provide your {@link ControllerFactory} impl.
-     * @param controllerFactory: your {@link ControllerFactory} implementation
-     */
-    public static void init(ControllerFactory controllerFactory) {
-        Views.controllerFactory = controllerFactory;
-    }
+    private static ConcurrentHashMap<Integer, View> viewsCache = new ConcurrentHashMap<>();
 
     /**
      * Create a {@link StageView} instance that shows in its own/specific {@link Stage} when calling its show() method.
@@ -46,8 +35,7 @@ public class Views {
      * @return new {@link StageView} instance.
      */
     public static <T> StageView<T> create(Class<T> controllerClass, Stage stage) {
-        T controller = controllerFactory.create(controllerClass);
-        StageView stageView = new StageView(controller, stage);
+        StageView stageView = new StageView(controllerClass, stage);
         viewsCache.putIfAbsent(stageView.getController().hashCode(), stageView);
         return stageView;
     }

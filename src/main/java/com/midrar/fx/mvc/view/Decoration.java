@@ -9,12 +9,19 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface Decoration {
     /**
-     * Defines a title for the {@link ParentView} to use when is shown in a {@link javafx.stage.Stage} or a {@link javafx.scene.control.Tab}.
+     * Use this constant to define a localised value for the title.
+     * This means that the title value is searched in the resource bundle associated
+     * of the view.
      */
-    String title();
+    public static final String LOCALISED_TITLE = "title";
 
     /**
-     * Defines a list of icon images (.png or .jpg) for the {@link ParentView} to use when is shown in a {@link javafx.stage.Stage} or a {@link javafx.scene.control.Tab}.
+     * Defines a title for the {@link View} to use when is shown in a {@link javafx.stage.Stage} or a {@link javafx.scene.control.Tab}.
+     */
+    String title() default LOCALISED_TITLE;
+
+    /**
+     * Defines a list of icon images (.png or .jpg) for the {@link View} to use when is shown in a {@link javafx.stage.Stage} or a {@link javafx.scene.control.Tab}.
      */
     String[] icons() default {};
 }

@@ -62,12 +62,19 @@ class AnnotationsParser {
      * Get the title defined by @{@link Decoration} annotation.
      * @return the title defined by @{@link Decoration} if any
      */
-    public String title() {
+    public String title(Optional<ResourceBundle> bundle) {
         Decoration decorationAnnotation = clazz.getAnnotation(Decoration.class);
         if (decorationAnnotation == null) {
             return "";
         }
-        return decorationAnnotation.title();
+        String title = decorationAnnotation.title();
+        if(Decoration.LOCALISED_TITLE.equals(title) && bundle.isPresent()){
+            if(bundle.get().containsKey(Decoration.LOCALISED_TITLE)){
+                return resourceBundle().get().getString(Decoration.LOCALISED_TITLE);
+            }
+            return "";
+        }
+        return title;
     }
 
     /**
