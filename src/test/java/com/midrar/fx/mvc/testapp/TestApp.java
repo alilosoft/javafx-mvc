@@ -8,6 +8,24 @@ import javafx.stage.Stage;
 
 public class TestApp extends Application {
 
+    StageView<FXController1> fxView1;
+    StageView<FXController2> fxView2;
+
+    @Override
+    public void init() throws Exception {
+        fxView1 = Views.create(FXController1.class);
+        fxView2 = Views.create(FXController2.class);
+        fxView1.getController().setFxView2(fxView2);
+        fxView2.getController().setFxView1(fxView1);
+
+        fxView1.onShown(System.out::println);
+        fxView1.onHidden(System.out::println);
+        fxView1.onHideRequest(e ->  {
+            System.out.println(e);
+            //e.consume();
+        });
+    }
+
     public void start(Stage primaryStage) throws Exception {
         //Locale.setDefault(Locale.forLanguageTag("ar"));
         //ControllerManagerImpl controllerManager = ControllerManagerImpl.getInstance();
@@ -16,21 +34,13 @@ public class TestApp extends Application {
         //StageConfigurer stageConfigurer = new StageConfigurer().resizable(false);
         //Views.create(FXController1.class).show(primaryStage);
         long s = System.currentTimeMillis();
+
         //Views.create(MainController.class).show();
         //for(int i = 0; i < 50; i++)
-        StageView<FXController1> fxView1 = Views.create(FXController1.class);
-        View<FXController2> fxView2 = Views.create(FXController2.class);
-        fxView1.getController().setFxView2(fxView2);
-        fxView2.getController().setFxView1(fxView1);
 
-        fxView1.onShown(System.out::println);
         fxView1.show();
-        fxView1.onHidden(e ->  System.out.println(e));
-        fxView1.onHideRequest(e ->  {
-            System.out.println(e);
-            e.consume();
-        });
         //fxView2.show();
+
         System.out.println("takes: "+ (System.currentTimeMillis()-s));
 
         //fxView1.show(primaryStage);
