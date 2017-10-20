@@ -2,8 +2,8 @@ package com.midrar.fx.mvc.view;
 
 class PaneView<T> extends ParentView<T>{
 
-    PaneView(T controller) {
-        super(controller);
+    PaneView(Class<T> controllerClass) {
+        super(controllerClass);
     }
 
     @Override
@@ -12,7 +12,7 @@ class PaneView<T> extends ParentView<T>{
     }
 
     @Override
-    public void close() {
+    public void hide() {
 
     }
 

@@ -1,8 +1,9 @@
 package com.midrar.fx.mvc.view;
 
 class TabView<T> extends ParentView<T> {
-    TabView(T controller) {
-        super(controller);
+
+    TabView(Class<T> controllerClass) {
+        super(controllerClass);
     }
 
     @Override
@@ -11,7 +12,7 @@ class TabView<T> extends ParentView<T> {
     }
 
     @Override
-    public void close() {
+    public void hide() {
 
     }
 

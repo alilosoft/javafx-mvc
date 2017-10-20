@@ -63,7 +63,7 @@ abstract class ParentView<T> implements View<T>{
         controller = Controllers.create(controllerClass);
         annotationsParser = new AnnotationsParser(controllerClass);
         resourceBundle = annotationsParser.resourceBundle();
-        title = annotationsParser.title();
+        title = annotationsParser.title(resourceBundle);
         icons = annotationsParser.icons();
         cssUrls = annotationsParser.cssUrls();
         rootNode = loadRoot();
