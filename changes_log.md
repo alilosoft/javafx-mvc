@@ -19,3 +19,5 @@
 - Adding support for localised view title, that can be defined in resource bundle of view 
 - Adding support for show, hide and hide request listeners for the View
 
+# v0.1-beta4
+- StageView can be created outside JavaFX Application Thread.

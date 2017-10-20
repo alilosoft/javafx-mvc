@@ -6,7 +6,7 @@
 
     <groupId>com.midrar</groupId>
     <artifactId>javafx-mvc</artifactId>
-    <version>0.1-beta3</version>
+    <version>0.1-beta4</version>
     <name>JavaFx-MVC</name>
     <description>
         JavaFX-MVC framework for creating JavaFx apps using the MVC design pattern.

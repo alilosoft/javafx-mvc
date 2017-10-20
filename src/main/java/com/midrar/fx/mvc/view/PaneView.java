@@ -1,5 +1,8 @@
 package com.midrar.fx.mvc.view;
 
+import javafx.event.Event;
+import javafx.event.EventHandler;
+
 class PaneView<T> extends ParentView<T>{
 
     PaneView(Class<T> controllerClass) {
@@ -19,5 +22,20 @@ class PaneView<T> extends ParentView<T>{
     @Override
     public boolean isShowing() {
         return false;
+    }
+
+    @Override
+    public void onShown(EventHandler<Event> handler) {
+
+    }
+
+    @Override
+    public void onHidden(EventHandler<Event> handler) {
+
+    }
+
+    @Override
+    public void onHideRequest(EventHandler<Event> handler) {
+
     }
 }
