@@ -1,7 +1,9 @@
 package com.midrar.fx.mvc.controller;
 
 public class Controllers {
-    private Controllers() {} // hide default constructor
+    private Controllers() {
+        throw new AssertionError("Sorry! I'm not instantiable");
+    } // hide default constructor
 
     private static ControllerFactory _controllerFactory = ControllerFactory.reflectionFactory();
 

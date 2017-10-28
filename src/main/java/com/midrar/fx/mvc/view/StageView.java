@@ -63,6 +63,7 @@ public class StageView<T> extends ParentView<T> {
         onShownHandler.ifPresent(h -> stage.setOnShown(h::handle));
         onHiddenHandler.ifPresent(h -> stage.setOnHidden(h::handle));
         onHideRequestHandler.ifPresent(h -> stage.setOnCloseRequest(h::handle));
+        stage.centerOnScreen();
         stage.show();
         stage.toFront();
     }

@@ -15,7 +15,7 @@ import static com.midrar.fx.mvc.utils.Asserts.assertParameterNotNull;
 
 public class Views {
     private Views() {
-        //Hide the default constructor!!!
+        throw new AssertionError("Sorry! I'm not instantiable");
     } // hide default constructor
 
     private static ConcurrentHashMap<Integer, View> viewsCache = new ConcurrentHashMap<>();
